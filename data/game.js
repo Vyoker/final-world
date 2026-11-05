@@ -1,0 +1,548 @@
+window.GAME_DATA = {
+  "meta": {
+    "title": "Final World",
+    "version": "1.2",
+    "startMap": "town",
+    "startX": 7,
+    "startY": 8,
+    "gold": 200
+  },
+  "classes": [
+    {
+      "id": "warrior",
+      "name": "Warrior",
+      "hp": 35,
+      "mp": 0,
+      "atk": 8,
+      "def": 5,
+      "mag": 1,
+      "spd": 4,
+      "color": "#d9534f",
+      "sprite": "assets/chars/warrior.png"
+    },
+    {
+      "id": "thief",
+      "name": "Thief",
+      "hp": 28,
+      "mp": 4,
+      "atk": 6,
+      "def": 3,
+      "mag": 2,
+      "spd": 8,
+      "color": "#5cb85c",
+      "sprite": "assets/chars/thief.png"
+    },
+    {
+      "id": "whitemage",
+      "name": "White Mage",
+      "hp": 22,
+      "mp": 14,
+      "atk": 3,
+      "def": 2,
+      "mag": 9,
+      "spd": 5,
+      "color": "#f0f0f0",
+      "sprite": "assets/chars/whitemage.png"
+    },
+    {
+      "id": "blackmage",
+      "name": "Black Mage",
+      "hp": 20,
+      "mp": 16,
+      "atk": 2,
+      "def": 2,
+      "mag": 10,
+      "spd": 5,
+      "color": "#6f42c1",
+      "sprite": "assets/chars/blackmage.png"
+    }
+  ],
+  "party": [
+    "warrior",
+    "thief",
+    "whitemage",
+    "blackmage"
+  ],
+  "items": [
+    {
+      "id": "potion",
+      "name": "Potion",
+      "type": "consumable",
+      "effect": "heal",
+      "value": 40,
+      "price": 30,
+      "desc": "Memulihkan 40 HP."
+    },
+    {
+      "id": "ether",
+      "name": "Ether",
+      "type": "consumable",
+      "effect": "mp",
+      "value": 15,
+      "price": 80,
+      "desc": "Memulihkan 15 MP."
+    },
+    {
+      "id": "phoenix",
+      "name": "Phoenix Down",
+      "type": "consumable",
+      "effect": "revive",
+      "value": 20,
+      "price": 150,
+      "desc": "Menghidupkan kembali sekutu."
+    },
+    {
+      "id": "key",
+      "name": "Kunci Kuno",
+      "type": "key",
+      "effect": "none",
+      "value": 0,
+      "price": 0,
+      "desc": "Membuka pintu kuil."
+    }
+  ],
+  "equipment": [
+    {
+      "id": "sword1",
+      "name": "Iron Sword",
+      "slot": "weapon",
+      "atk": 6,
+      "def": 0,
+      "mag": 0,
+      "spd": 0,
+      "price": 120,
+      "classes": [
+        "warrior"
+      ]
+    },
+    {
+      "id": "dagger1",
+      "name": "Dagger",
+      "slot": "weapon",
+      "atk": 4,
+      "def": 0,
+      "mag": 0,
+      "spd": 2,
+      "price": 90,
+      "classes": [
+        "thief",
+        "warrior"
+      ]
+    },
+    {
+      "id": "staff1",
+      "name": "Wooden Staff",
+      "slot": "weapon",
+      "atk": 2,
+      "def": 0,
+      "mag": 4,
+      "spd": 0,
+      "price": 80,
+      "classes": [
+        "whitemage",
+        "blackmage"
+      ]
+    },
+    {
+      "id": "armor1",
+      "name": "Leather Armor",
+      "slot": "armor",
+      "atk": 0,
+      "def": 4,
+      "mag": 0,
+      "spd": 0,
+      "price": 100,
+      "classes": []
+    },
+    {
+      "id": "helm1",
+      "name": "Iron Helm",
+      "slot": "head",
+      "atk": 0,
+      "def": 2,
+      "mag": 0,
+      "spd": 0,
+      "price": 70,
+      "classes": [
+        "warrior",
+        "thief"
+      ]
+    },
+    {
+      "id": "ring1",
+      "name": "Power Ring",
+      "slot": "accessory",
+      "atk": 3,
+      "def": 0,
+      "mag": 0,
+      "spd": 1,
+      "price": 200,
+      "classes": []
+    }
+  ],
+  "skills": [
+    {
+      "id": "fire",
+      "name": "Fire",
+      "mp": 4,
+      "power": 18,
+      "type": "damage",
+      "fx": "fire",
+      "classes": [
+        "blackmage"
+      ]
+    },
+    {
+      "id": "blizzard",
+      "name": "Blizzard",
+      "mp": 4,
+      "power": 16,
+      "type": "damage",
+      "fx": "ice",
+      "classes": [
+        "blackmage"
+      ]
+    },
+    {
+      "id": "thunder",
+      "name": "Thunder",
+      "mp": 6,
+      "power": 26,
+      "type": "damage",
+      "fx": "thunder",
+      "classes": [
+        "blackmage"
+      ]
+    },
+    {
+      "id": "cure",
+      "name": "Cure",
+      "mp": 4,
+      "power": 25,
+      "type": "heal",
+      "fx": "heal",
+      "classes": [
+        "whitemage"
+      ]
+    },
+    {
+      "id": "backstab",
+      "name": "Backstab",
+      "mp": 3,
+      "power": 14,
+      "type": "damage",
+      "fx": "slash",
+      "classes": [
+        "thief"
+      ]
+    }
+  ],
+  "enemies": [
+    {
+      "id": "goblin",
+      "name": "Goblin",
+      "hp": 24,
+      "atk": 7,
+      "def": 2,
+      "spd": 4,
+      "exp": 8,
+      "gold": 12,
+      "color": "#4caf50",
+      "img": "assets/enemies/goblin.png"
+    },
+    {
+      "id": "wolf",
+      "name": "Wolf",
+      "hp": 30,
+      "atk": 9,
+      "def": 3,
+      "spd": 7,
+      "exp": 12,
+      "gold": 15,
+      "color": "#9e9e9e",
+      "img": "assets/enemies/wolf.png"
+    },
+    {
+      "id": "ogre",
+      "name": "Ogre",
+      "hp": 90,
+      "atk": 16,
+      "def": 6,
+      "spd": 3,
+      "exp": 60,
+      "gold": 100,
+      "color": "#ff9800",
+      "boss": true,
+      "img": "assets/enemies/ogre.png"
+    }
+  ],
+  "quests": [
+    {
+      "id": "q1",
+      "name": "Bicara dengan Tetua",
+      "desc": "Temui tetua di desa.",
+      "type": "talk",
+      "target": "elder",
+      "count": 1,
+      "rewardGold": 50,
+      "rewardExp": 10,
+      "rewardItems": [
+        "potion"
+      ],
+      "next": "q2"
+    },
+    {
+      "id": "q2",
+      "name": "Bersihkan Hutan",
+      "desc": "Kalahkan 5 Goblin.",
+      "type": "kill",
+      "target": "goblin",
+      "count": 5,
+      "rewardGold": 150,
+      "rewardExp": 40,
+      "rewardItems": [
+        "ether"
+      ],
+      "next": "q3"
+    },
+    {
+      "id": "q3",
+      "name": "Kalahkan Ogre",
+      "desc": "Hadapi Ogre di gua.",
+      "type": "kill",
+      "target": "ogre",
+      "count": 1,
+      "rewardGold": 500,
+      "rewardExp": 200,
+      "rewardItems": [
+        "key"
+      ],
+      "next": ""
+    }
+  ],
+  "maps": [
+    {
+      "id": "town",
+      "name": "Desa Awal",
+      "w": 16,
+      "h": 12,
+      "encounter": 0,
+      "enemies": [],
+      "tiles": [
+        "WWWWWWWWWWWWWWWW",
+        "WGGGGGGGGGGGGGGW",
+        "WGHHGGGGGGGHHGGW",
+        "WGHHGGGTGGGHHGGW",
+        "WGGdGGGGGGGdGGGW",
+        "WGGGGGPPPPGGGGGW",
+        "WGGGGGPGGPGGGGGW",
+        "WGTGGGPGGPGGTGGW",
+        "WGGGGGPGGPGGGGGW",
+        "WGGGGGPGGPGGGGGW",
+        "WGGGGGGGGGGGGGGW",
+        "WWWWWWWWWWWWWWDW"
+      ],
+      "events": [
+        {
+          "x": 7,
+          "y": 6,
+          "kind": "npc",
+          "id": "elder",
+          "name": "Tetua",
+          "text": [
+            "Selamat datang, pejuang cahaya!",
+            "Hutan di timur dipenuhi Goblin. Kalahkan mereka."
+          ],
+          "quest": "q1",
+          "img": "assets/chars/npc.png"
+        },
+        {
+          "x": 10,
+          "y": 6,
+          "kind": "shop",
+          "id": "shop1",
+          "name": "Pedagang",
+          "text": [
+            "Silakan lihat dagangan saya."
+          ],
+          "stock": [
+            "potion",
+            "ether",
+            "phoenix",
+            "sword1",
+            "dagger1",
+            "staff1",
+            "armor1",
+            "helm1",
+            "ring1"
+          ],
+          "img": "assets/chars/merchant.png"
+        },
+        {
+          "x": 14,
+          "y": 11,
+          "kind": "warp",
+          "map": "forest",
+          "tx": 1,
+          "ty": 5
+        },
+        {
+          "x": 3,
+          "y": 4,
+          "kind": "heal",
+          "name": "Penginapan",
+          "price": 20
+        }
+      ]
+    },
+    {
+      "id": "forest",
+      "name": "Hutan Gelap",
+      "w": 16,
+      "h": 12,
+      "encounter": 12,
+      "enemies": [
+        "goblin",
+        "wolf"
+      ],
+      "tiles": [
+        "TTTTTTTTTTTTTTTT",
+        "TGGGGTGGGGGTGGGT",
+        "TGGTGGGGTGGGGGGT",
+        "TGGGGGGGGGGTGGGT",
+        "TGGGTGGGGGGGGGTT",
+        "WGGGGGGGTGGGGGGD",
+        "TGGGGGTGGGGGGGGT",
+        "TGGTGGGGGGGTGGGT",
+        "TGGGGGGGTGGGGGGT",
+        "TGGGTGGGGGGGGTGT",
+        "TGGGGGGGGGGGGGGT",
+        "TTTTTTTTTTTTTTTT"
+      ],
+      "events": [
+        {
+          "x": 0,
+          "y": 5,
+          "kind": "warp",
+          "map": "town",
+          "tx": 14,
+          "ty": 10
+        },
+        {
+          "x": 15,
+          "y": 5,
+          "kind": "warp",
+          "map": "cave",
+          "tx": 1,
+          "ty": 5
+        }
+      ]
+    },
+    {
+      "id": "cave",
+      "name": "Gua Ogre",
+      "w": 16,
+      "h": 12,
+      "encounter": 10,
+      "enemies": [
+        "wolf",
+        "goblin"
+      ],
+      "tiles": [
+        "RRRRRRRRRRRRRRRR",
+        "RFFFFFFRFFFFFFFR",
+        "RFFRFFFFFFRFFFFR",
+        "RFFFFFRFFFFFFFFR",
+        "RFFFFFFFFRFFFFFR",
+        "RFFFFFFFFFFFFFFR",
+        "RFRFFFFFFFFFRFFR",
+        "RFFFFFRFFFFFFFFR",
+        "RFFFFFFFFRFFFFFR",
+        "RFFRFFFFFFFFFFFR",
+        "RFFFFFFFFFFFFFFR",
+        "RRRRRRRRRRRRRRRR"
+      ],
+      "events": [
+        {
+          "x": 0,
+          "y": 5,
+          "kind": "warp",
+          "map": "forest",
+          "tx": 14,
+          "ty": 5
+        },
+        {
+          "x": 13,
+          "y": 5,
+          "kind": "boss",
+          "enemy": "ogre",
+          "name": "Ogre",
+          "flag": "ogre_dead"
+        },
+        {
+          "x": 14,
+          "y": 2,
+          "kind": "chest",
+          "item": "phoenix",
+          "flag": "chest1"
+        }
+      ]
+    }
+  ],
+  "tileset": {
+    "G": {
+      "name": "Rumput",
+      "color": "#4a8f3c",
+      "solid": false,
+      "img": "assets/tiles/grass.png"
+    },
+    "W": {
+      "name": "Air",
+      "color": "#2a5fa8",
+      "solid": true,
+      "img": "assets/tiles/water.png"
+    },
+    "T": {
+      "name": "Pohon",
+      "color": "#1f5a2a",
+      "solid": true,
+      "img": "assets/tiles/tree.png"
+    },
+    "H": {
+      "name": "Rumah",
+      "color": "#8b5a2b",
+      "solid": true,
+      "img": "assets/tiles/house.png"
+    },
+    "P": {
+      "name": "Jalan",
+      "color": "#c2a36b",
+      "solid": false,
+      "img": "assets/tiles/road.png"
+    },
+    "D": {
+      "name": "Pintu",
+      "color": "#5c3b1e",
+      "solid": false,
+      "img": "assets/tiles/door.png"
+    },
+    "d": {
+      "name": "Pintu rumah",
+      "color": "#3b2412",
+      "solid": true,
+      "img": "assets/tiles/housedoor.png"
+    },
+    "R": {
+      "name": "Batu",
+      "color": "#4d4d57",
+      "solid": true,
+      "img": "assets/tiles/rock.png"
+    },
+    "F": {
+      "name": "Lantai gua",
+      "color": "#7a6e5a",
+      "solid": false,
+      "img": "assets/tiles/cave.png"
+    }
+  }
+};

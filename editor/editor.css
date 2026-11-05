@@ -1,0 +1,30 @@
+*{box-sizing:border-box}
+body{margin:0;background:#12122a;color:#eee;font-family:system-ui,sans-serif;font-size:14px}
+header{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px;background:#1b1b45;position:sticky;top:0;z-index:5}
+header .sp{flex:1}
+button{background:#2b3bd0;color:#fff;border:0;border-radius:6px;padding:8px 12px;font-size:13px}
+button.sec{background:#33335c}
+button.dng{background:#a33}
+#tabs{display:flex;overflow-x:auto;background:#181838;gap:2px;padding:4px}
+#tabs button{background:#26264d;white-space:nowrap}
+#tabs button.on{background:#2b3bd0}
+main{display:flex;flex-direction:column;gap:10px;padding:10px;max-width:900px;margin:0 auto}
+.split{display:flex;gap:10px;flex-wrap:wrap}
+.list{flex:1 1 160px;max-height:300px;overflow:auto;background:#1b1b3d;border-radius:8px;padding:4px}
+.list div{padding:8px;border-radius:6px;cursor:pointer}
+.list div.on{background:#2b3bd0}
+.form{flex:2 1 260px;background:#1b1b3d;border-radius:8px;padding:10px}
+label{display:block;margin:6px 0 2px;font-size:12px;opacity:.8}
+input,select,textarea{width:100%;background:#0d0d24;color:#fff;border:1px solid #44448a;border-radius:6px;padding:7px;font-size:14px}
+textarea{min-height:70px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+canvas{background:#000;border:1px solid #66a;image-rendering:pixelated;max-width:100%;touch-action:none}
+.palette{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}
+.palette button{display:flex;align-items:center;gap:6px;background:#26264d;padding:4px 8px}
+.palette button.on{outline:2px solid #ffd54f}
+.palette i{width:16px;height:16px;border:1px solid #fff;display:inline-block}
+.row{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap}
+#toast{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:#000c;padding:8px 14px;border-radius:20px;opacity:0;transition:.3s;pointer-events:none}
+#toast.on{opacity:1}
+.ev{background:#0d0d24;border-radius:6px;padding:6px;margin:4px 0;font-size:12px}
+.imgf{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.imgf img{max-width:144px;max-height:128px;image-rendering:pixelated;background:#0d0d24;border:1px solid #44448a}.imgf input{flex:1;min-width:140px}.small{font-size:12px;opacity:.8}

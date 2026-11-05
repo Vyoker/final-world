@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Final World Maker</title>
+<link rel="stylesheet" href="editor.css">
+</head>
+<body>
+<header>
+  <b>Final World Maker</b>
+  <span class="sp"></span><span id="who" class="small"></span>
+  <button id="bSave">Simpan</button>
+  <button id="bPlay">Main</button>
+  <button id="bExport">Ekspor</button>
+  <button id="bImport">Impor</button>
+  <button id="bReset">Reset</button>
+  <button id="bOut" class="sec">Logout</button>
+  <input type="file" id="fileIn" accept=".json" hidden>
+</header>
+<nav id="tabs"></nav>
+<main id="main"></main>
+<div id="toast"></div>
+<script src="../data/game.js"></script>
+<script src="../common.js"></script>
+<script src="editor.js"></script>
+</body>
+</html>

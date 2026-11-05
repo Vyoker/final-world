@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Final World</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <div id="screen">
+    <canvas id="cv" width="256" height="192"></canvas>
+    <div id="hud"></div>
+    <div id="dialog" class="hidden"></div>
+    <div id="panel" class="hidden"></div>
+    <div id="battle" class="hidden"></div>
+    <canvas id="fx"></canvas>
+    <div id="title">
+      <h1 id="gtitle">Final World</h1>
+      <div id="who" class="small"></div>
+      <button id="btnNew">Mulai Baru</button>
+      <button id="btnLoad">Lanjutkan</button>
+      <a id="lnkEditor" class="lnk hidden" href="../editor/index.html">Buka Editor (Developer)</a>
+      <button id="btnLogout" class="ghost">Logout</button>
+    </div>
+  </div>
+  <div id="pad">
+    <div id="dpad">
+      <button data-k="up">▲</button>
+      <button data-k="left">◀</button>
+      <button data-k="right">▶</button>
+      <button data-k="down">▼</button>
+    </div>
+    <div id="acts">
+      <button data-k="menu">MENU</button>
+      <button data-k="b">B</button>
+      <button data-k="a">A</button>
+    </div>
+  </div>
+</div>
+<script src="../data/game.js"></script>
+<script src="../common.js"></script>
+<script src="engine.js"></script>
+</body>
+</html>
