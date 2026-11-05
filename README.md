@@ -1,4 +1,4 @@
-# Final World (v1.2)
+# Final World (v1.3)
 
 RPG HTML5 turn-based + editor ala RPG Maker, dengan login Player / Developer.
 Terinspirasi struktur game J2ME "Final Fantasy" (FF - 1.jar). Data, nama, dan grafis di sini orisinal; aset/teks/musik asli tidak disalin.
@@ -13,19 +13,15 @@ Terinspirasi struktur game J2ME "Final Fantasy" (FF - 1.jar). Data, nama, dan gr
 ## Struktur
 - `index.html` login/register, `common.js` auth + cache gambar
 - `game/` engine · `editor/` Final World Maker
-- `assets/` tile 16px, sprite 4 arah, musuh 32px, ikon event (dibuat `python3 tools/make_assets.py`)
+- `assets/` tile 16px, sprite 4 arah (webp 48×64), musuh 32px, ikon item/equipment 32px, ikon event
 - `data/game.json` sumber data → `node build-data.js` → `data/game.js`
 
-## Fitur v1.1
-- Gambar tile, sprite karakter (sheet 4 arah), musuh, NPC; upload PNG langsung di editor (diperkecil otomatis).
-- Efek skill: slash, fire, ice, thunder, heal + angka damage; skill bisa dibatasi per class.
-- Kamera mengikuti pemain (map bisa lebih besar dari layar).
-
-## Animasi sprite jalan (v1.2)
-- Format sheet karakter: **3 kolom × 4 baris** (kolom = diam, langkah A, langkah B; baris = bawah, atas, kiri, kanan). Contoh: 48×64 px untuk frame 16 px.
-- Pergerakan antar-tile dihaluskan (tween 130 ms), frame berganti saat berjalan, diam saat berhenti. NPC/pedagang punya animasi idle, musuh di battle bergoyang naik-turun.
-- Sheet lama (1 baris × 4 arah) dan gambar tunggal tetap didukung. Upload sheet sendiri di Editor → Karakter → "Sprite jalan".
-- Buat ulang aset bawaan: `python3 tools/make_assets.py`
+## Fitur v1.3
+- Semua aset gambar baru bergaya pixel art 16-bit (webp): 6 sprite sheet karakter (Warrior, Thief, White Mage, Black Mage, NPC Tetua, Pedagang), 3 musuh (Goblin, Wolf, Ogre), 9 tile world (rumput/air/jalan seamless), dan 10 ikon item/equipment baru (Potion, Ether, Phoenix Down, Kunci Kuno, Iron Sword, Dagger, Wooden Staff, Leather Armor, Iron Helm, Power Ring).
+- Ikon item/equipment tampil di toko, inventaris, menu equip, dan menu item saat battle. Ikon bisa diganti di Editor → Item / Equipment.
+- Format sheet karakter tetap **3 kolom × 4 baris** (kolom = diam, langkah A, langkah B; baris = bawah, atas, kiri, kanan), frame 16 px. Pergerakan antar-tile dihaluskan (tween 130 ms), frame berganti saat berjalan, diam saat berhenti. NPC/pedagang punya animasi idle.
+- Sheet lama (1 baris × 4 arah) dan gambar tunggal tetap didukung. Upload gambar sendiri di Editor (diperkecil otomatis).
+- Efek skill (slash, fire, ice, thunder, heal + angka damage, bisa dibatasi per class) dan kamera mengikuti pemain tetap seperti sebelumnya.
 
 ## Deploy GitHub Pages
 Push ke `main` → Settings → Pages → Source: **GitHub Actions** (workflow sudah ada).

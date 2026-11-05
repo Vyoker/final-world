@@ -1,4 +1,4 @@
-/* Final World engine v1.2 — data driven. Data: localStorage 'fw_data' (dari editor) atau window.GAME_DATA. */
+/* Final World engine v1.3 — data driven. Data: localStorage 'fw_data' (dari editor) atau window.GAME_DATA. */
 (function () {
   'use strict';
   const { Auth, IMG } = FW;
@@ -13,6 +13,7 @@
   try { D = JSON.parse(localStorage.getItem(DATA_KEY)) || window.GAME_DATA; } catch (e) { D = window.GAME_DATA; }
   const by = (arr, id) => arr.find((o) => o.id === id);
   const itemOf = (id) => by(D.items, id) || by(D.equipment, id);
+  const icon = (it, sz) => it && it.img ? `<img src="${IMG.resolve(it.img)}" style="width:${sz || 20}px;height:${sz || 20}px;image-rendering:pixelated;vertical-align:-4px"> ` : '';
   $('gtitle').textContent = D.meta.title || 'Final World';
   document.title = D.meta.title || 'Final World';
   $('who').textContent = 'Halo, ' + sess.name + ' (' + sess.role + ')';
@@ -60,7 +61,7 @@
     const im = IMG.ready(src); if (!im) return false;
     const r = IMG.rect(im, dir, frame); ctx.drawImage(im, r[0], r[1], r[2], r[3], px, py, size, size); return true;
   }
-  const EV_IMG = { npc: 'assets/chars/npc.png', shop: 'assets/chars/merchant.png', chest: 'assets/events/chest.png', heal: 'assets/events/heal.png' };
+  const EV_IMG = { npc: 'assets/chars/npc.webp', shop: 'assets/chars/merchant.webp', chest: 'assets/events/chest.png', heal: 'assets/events/heal.png' };
   const EV_COL = { npc: '#ffcc80', shop: '#ffd54f', chest: '#a1662f', boss: '#ff9800', heal: '#e0e0e0', warp: 'rgba(255,255,255,.35)' };
   function draw() {
     ctx.imageSmoothingEnabled = false; ctx.fillStyle = '#000'; ctx.fillRect(0, 0, cv.width, cv.height);
@@ -146,7 +147,7 @@
     const hdr = (on, msg) => `<b>${ev.name || 'Toko'}</b> <span class="small">Gil: ${S.gold}</span><div class="small">${msg || ''}</div><div class="tabs"><button data-a="buy" class="${on === 'buy' ? 'on' : ''}">Beli</button><button data-a="sell" class="${on === 'sell' ? 'on' : ''}">Jual</button><button data-a="x">Tutup</button></div>`;
     const render = (msg) => {
       let h = hdr('buy', msg);
-      for (const id of ev.stock || []) { const it = itemOf(id); if (it) h += `<button class="opt" data-a="b" data-b="${id}">${it.name} — ${it.price} Gil</button>`; }
+      for (const id of ev.stock || []) { const it = itemOf(id); if (it) h += `<button class="opt" data-a="b" data-b="${id}">${icon(it)}${it.name} — ${it.price} Gil</button>`; }
       openPanel(h);
       bindPanel((a, b) => {
         if (a === 'x') return closePanel(); if (a === 'sell') return renderSell();
@@ -155,7 +156,7 @@
     };
     const renderSell = (msg) => {
       let h = hdr('sell', msg);
-      for (const id in S.inv) { if (!S.inv[id]) continue; const it = itemOf(id); if (!it || it.type === 'key') continue; h += `<button class="opt" data-a="s" data-b="${id}">${it.name} x${S.inv[id]} — ${Math.floor(it.price / 2)} Gil</button>`; }
+      for (const id in S.inv) { if (!S.inv[id]) continue; const it = itemOf(id); if (!it || it.type === 'key') continue; h += `<button class="opt" data-a="s" data-b="${id}">${icon(it)}${it.name} x${S.inv[id]} — ${Math.floor(it.price / 2)} Gil</button>`; }
       openPanel(h);
       bindPanel((a, b) => {
         if (a === 'x') return closePanel(); if (a === 'buy') return render();
@@ -171,7 +172,7 @@
     const tabs = ['party', 'items', 'equip', 'quest', 'save'], label = { party: 'Status', items: 'Item', equip: 'Equip', quest: 'Misi', save: 'Simpan' };
     let h = `<div class="tabs">${tabs.map((t) => `<button data-a="tab" data-b="${t}" class="${t === tab ? 'on' : ''}">${label[t]}</button>`).join('')}<button data-a="close">X</button></div><div class="small">Gil: ${S.gold}</div>`;
     if (tab === 'party') h += S.party.map((m) => { const b = base(m), c = by(D.classes, m.cid); return `<div class="box" style="margin:4px 0"><canvas class="face" data-s="${c.sprite || ''}" width="16" height="16"></canvas> <b>${m.name}</b> Lv${m.lv} <span class="small">EXP ${m.exp}/${m.lv * 30}</span><br>HP ${m.hp}/${b.maxhp} MP ${m.mp}/${b.maxmp}<br><span class="small">ATK ${b.atk} DEF ${b.def} MAG ${b.mag} SPD ${b.spd}</span></div>`; }).join('');
-    else if (tab === 'items') { const ids = Object.keys(S.inv).filter((i) => S.inv[i] > 0); h += ids.length ? ids.map((i) => { const it = itemOf(i); return `<button class="opt" data-a="use" data-b="${i}">${it.name} x${S.inv[i]}<br><span class="small">${it.desc || ''}</span></button>`; }).join('') : '<p>Kosong.</p>'; }
+    else if (tab === 'items') { const ids = Object.keys(S.inv).filter((i) => S.inv[i] > 0); h += ids.length ? ids.map((i) => { const it = itemOf(i); return `<button class="opt" data-a="use" data-b="${i}">${icon(it)}${it.name} x${S.inv[i]}<br><span class="small">${it.desc || ''}</span></button>`; }).join('') : '<p>Kosong.</p>'; }
     else if (tab === 'equip') h += S.party.map((m, i) => `<div class="box" style="margin:4px 0"><b>${m.name}</b>` + ['weapon', 'armor', 'head', 'accessory'].map((s) => { const e = by(D.equipment, m.equip[s]); return `<button class="opt" data-a="slot" data-b="${i}:${s}">${s}: ${e ? e.name : '-'}</button>`; }).join('') + '</div>').join('');
     else if (tab === 'quest') {
       const act = Object.keys(S.quests).map((id) => { const q = by(D.quests, id); return q ? `<div class="box" style="margin:4px 0"><b>${q.name}</b> (${S.quests[id].n}/${q.count})<br><span class="small">${q.desc}</span></div>` : ''; }).join('');
@@ -189,7 +190,7 @@
   }
   function useItemMenu(id) {
     const it = by(D.items, id); if (!it || it.effect === 'none') return openMenu('items');
-    let h = `<b>${it.name}</b> — pakai ke:`;
+    let h = `<b>${icon(it, 24)}${it.name}</b> — pakai ke:`;
     S.party.forEach((m, i) => { const b = base(m); h += `<button class="opt" data-a="to" data-b="${i}">${m.name} HP ${m.hp}/${b.maxhp} MP ${m.mp}/${b.maxmp}</button>`; });
     openPanel(h + '<button class="opt" data-a="back">Batal</button>');
     bindPanel((a, b) => { if (a === 'back') return openMenu('items'); const m = S.party[+b]; if (applyItem(it, m, base(m))) S.inv[id]--; openMenu('items'); });
@@ -206,7 +207,7 @@
     for (const id in S.inv) {
       if (!S.inv[id]) continue; const e = by(D.equipment, id);
       if (!e || e.slot !== slot || (e.classes && e.classes.length && !e.classes.includes(m.cid))) continue;
-      h += `<button class="opt" data-a="eq" data-b="${id}">${e.name} (ATK+${e.atk} DEF+${e.def} MAG+${e.mag} SPD+${e.spd}) x${S.inv[id]}</button>`;
+      h += `<button class="opt" data-a="eq" data-b="${id}">${icon(e)}${e.name} (ATK+${e.atk} DEF+${e.def} MAG+${e.mag} SPD+${e.spd}) x${S.inv[id]}</button>`;
     }
     openPanel(h + '<button class="opt" data-a="back">Batal</button>');
     bindPanel((a, b) => {
@@ -317,7 +318,7 @@
   }
   function itemMenu() {
     const ids = Object.keys(S.inv).filter((i) => S.inv[i] > 0 && by(D.items, i) && by(D.items, i).effect !== 'none');
-    $('bcmd').innerHTML = '<div class="row">' + ids.map((i) => `<button class="opt" data-i="${i}">${by(D.items, i).name} x${S.inv[i]}</button>`).join('') + '<button class="opt" data-i="x">Batal</button></div>';
+    $('bcmd').innerHTML = '<div class="row">' + ids.map((i) => `<button class="opt" data-i="${i}">${icon(by(D.items, i))}${by(D.items, i).name} x${S.inv[i]}</button>`).join('') + '<button class="opt" data-i="x">Batal</button></div>';
     $('bcmd').onclick = (ev) => {
       const id = ev.target.dataset.i; if (!id) return; if (id === 'x') return cmdMenu(); const it = by(D.items, id);
       pickAlly((a) => { if (applyItem(it, a, base(a))) { S.inv[id]--; step(`${S.party[B.actor].name} memakai ${it.name} pada ${a.name}.`, false, { kind: 'heal', target: 'p' + S.party.indexOf(a), text: it.effect === 'revive' ? 'Hidup!' : '+' + it.value, color: '#7f7' }); } else cmdMenu(); });

@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Final World",
-    "version": "1.2",
+    "version": "1.3",
     "startMap": "town",
     "startX": 7,
     "startY": 8,
@@ -18,7 +18,7 @@
       "mag": 1,
       "spd": 4,
       "color": "#d9534f",
-      "sprite": "assets/chars/warrior.png"
+      "sprite": "assets/chars/warrior.webp"
     },
     {
       "id": "thief",
@@ -30,7 +30,7 @@
       "mag": 2,
       "spd": 8,
       "color": "#5cb85c",
-      "sprite": "assets/chars/thief.png"
+      "sprite": "assets/chars/thief.webp"
     },
     {
       "id": "whitemage",
@@ -42,7 +42,7 @@
       "mag": 9,
       "spd": 5,
       "color": "#f0f0f0",
-      "sprite": "assets/chars/whitemage.png"
+      "sprite": "assets/chars/whitemage.webp"
     },
     {
       "id": "blackmage",
@@ -54,7 +54,7 @@
       "mag": 10,
       "spd": 5,
       "color": "#6f42c1",
-      "sprite": "assets/chars/blackmage.png"
+      "sprite": "assets/chars/blackmage.webp"
     }
   ],
   "party": [
@@ -71,7 +71,8 @@
       "effect": "heal",
       "value": 40,
       "price": 30,
-      "desc": "Memulihkan 40 HP."
+      "desc": "Memulihkan 40 HP.",
+      "img": "assets/items/potion.webp"
     },
     {
       "id": "ether",
@@ -80,7 +81,8 @@
       "effect": "mp",
       "value": 15,
       "price": 80,
-      "desc": "Memulihkan 15 MP."
+      "desc": "Memulihkan 15 MP.",
+      "img": "assets/items/ether.webp"
     },
     {
       "id": "phoenix",
@@ -89,7 +91,8 @@
       "effect": "revive",
       "value": 20,
       "price": 150,
-      "desc": "Menghidupkan kembali sekutu."
+      "desc": "Menghidupkan kembali sekutu.",
+      "img": "assets/items/phoenix.webp"
     },
     {
       "id": "key",
@@ -98,7 +101,8 @@
       "effect": "none",
       "value": 0,
       "price": 0,
-      "desc": "Membuka pintu kuil."
+      "desc": "Membuka pintu kuil.",
+      "img": "assets/items/key.webp"
     }
   ],
   "equipment": [
@@ -113,7 +117,8 @@
       "price": 120,
       "classes": [
         "warrior"
-      ]
+      ],
+      "img": "assets/items/sword1.webp"
     },
     {
       "id": "dagger1",
@@ -127,7 +132,8 @@
       "classes": [
         "thief",
         "warrior"
-      ]
+      ],
+      "img": "assets/items/dagger1.webp"
     },
     {
       "id": "staff1",
@@ -141,7 +147,8 @@
       "classes": [
         "whitemage",
         "blackmage"
-      ]
+      ],
+      "img": "assets/items/staff1.webp"
     },
     {
       "id": "armor1",
@@ -152,7 +159,8 @@
       "mag": 0,
       "spd": 0,
       "price": 100,
-      "classes": []
+      "classes": [],
+      "img": "assets/items/armor1.webp"
     },
     {
       "id": "helm1",
@@ -166,7 +174,8 @@
       "classes": [
         "warrior",
         "thief"
-      ]
+      ],
+      "img": "assets/items/helm1.webp"
     },
     {
       "id": "ring1",
@@ -177,7 +186,8 @@
       "mag": 0,
       "spd": 1,
       "price": 200,
-      "classes": []
+      "classes": [],
+      "img": "assets/items/ring1.webp"
     }
   ],
   "skills": [
@@ -248,7 +258,7 @@
       "exp": 8,
       "gold": 12,
       "color": "#4caf50",
-      "img": "assets/enemies/goblin.png"
+      "img": "assets/enemies/goblin.webp"
     },
     {
       "id": "wolf",
@@ -260,7 +270,7 @@
       "exp": 12,
       "gold": 15,
       "color": "#9e9e9e",
-      "img": "assets/enemies/wolf.png"
+      "img": "assets/enemies/wolf.webp"
     },
     {
       "id": "ogre",
@@ -273,7 +283,7 @@
       "gold": 100,
       "color": "#ff9800",
       "boss": true,
-      "img": "assets/enemies/ogre.png"
+      "img": "assets/enemies/ogre.webp"
     }
   ],
   "quests": [
@@ -354,7 +364,7 @@
             "Hutan di timur dipenuhi Goblin. Kalahkan mereka."
           ],
           "quest": "q1",
-          "img": "assets/chars/npc.png"
+          "img": "assets/chars/npc.webp"
         },
         {
           "x": 10,
@@ -376,7 +386,7 @@
             "helm1",
             "ring1"
           ],
-          "img": "assets/chars/merchant.png"
+          "img": "assets/chars/merchant.webp"
         },
         {
           "x": 14,
@@ -494,55 +504,55 @@
       "name": "Rumput",
       "color": "#4a8f3c",
       "solid": false,
-      "img": "assets/tiles/grass.png"
+      "img": "assets/tiles/grass.webp"
     },
     "W": {
       "name": "Air",
       "color": "#2a5fa8",
       "solid": true,
-      "img": "assets/tiles/water.png"
+      "img": "assets/tiles/water.webp"
     },
     "T": {
       "name": "Pohon",
       "color": "#1f5a2a",
       "solid": true,
-      "img": "assets/tiles/tree.png"
+      "img": "assets/tiles/tree.webp"
     },
     "H": {
       "name": "Rumah",
       "color": "#8b5a2b",
       "solid": true,
-      "img": "assets/tiles/house.png"
+      "img": "assets/tiles/house.webp"
     },
     "P": {
       "name": "Jalan",
       "color": "#c2a36b",
       "solid": false,
-      "img": "assets/tiles/road.png"
+      "img": "assets/tiles/road.webp"
     },
     "D": {
       "name": "Pintu",
       "color": "#5c3b1e",
       "solid": false,
-      "img": "assets/tiles/door.png"
+      "img": "assets/tiles/door.webp"
     },
     "d": {
       "name": "Pintu rumah",
       "color": "#3b2412",
       "solid": true,
-      "img": "assets/tiles/housedoor.png"
+      "img": "assets/tiles/housedoor.webp"
     },
     "R": {
       "name": "Batu",
       "color": "#4d4d57",
       "solid": true,
-      "img": "assets/tiles/rock.png"
+      "img": "assets/tiles/rock.webp"
     },
     "F": {
       "name": "Lantai gua",
       "color": "#7a6e5a",
       "solid": false,
-      "img": "assets/tiles/cave.png"
+      "img": "assets/tiles/cave.webp"
     }
   }
 }
