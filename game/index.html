@@ -21,7 +21,16 @@
       <button id="btnNew">Mulai Baru</button>
       <button id="btnLoad">Lanjutkan</button>
       <a id="lnkEditor" class="lnk hidden" href="../editor/index.html">Buka Editor (Developer)</a>
+      <button id="btnSound" class="ghost">Suara: Nyala</button>
       <button id="btnLogout" class="ghost">Logout</button>
+    </div>
+    <div id="loading">
+      <div class="ld-in">
+        <h1>Final World</h1>
+        <div class="ld-bar"><i id="ldFill"></i></div>
+        <div id="ldPct" class="small">0%</div>
+        <div id="ldMsg" class="small">Memuat data...</div>
+      </div>
     </div>
   </div>
   <div id="pad">
@@ -40,6 +49,7 @@
 </div>
 <script src="../data/game.js"></script>
 <script src="../common.js"></script>
+<script src="../sfx.js"></script>
 <script src="engine.js"></script>
 </body>
 </html>

@@ -21,13 +21,13 @@
   };
 
   function toast(t) { const e = $('toast'); e.textContent = t; e.className = 'on'; setTimeout(() => (e.className = ''), 1400); }
-  function save() { localStorage.setItem(KEY, JSON.stringify(D)); toast('Tersimpan'); }
+  function save() { localStorage.setItem(KEY, JSON.stringify(D)); if (window.SFX) SFX.save(); toast('Tersimpan'); }
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
 
   function renderTabs() {
     $('tabs').innerHTML = Object.keys(S).map((k) => `<button class="${k === tab ? 'on' : ''}" data-t="${k}">${S[k].title}</button>`).join('');
   }
-  $('tabs').onclick = (e) => { const t = e.target.dataset.t; if (t) { tab = t; sel = 0; render(); } };
+  $('tabs').onclick = (e) => { const t = e.target.dataset.t; if (t) { if (window.SFX) SFX.click(); tab = t; sel = 0; render(); } };
 
   function fieldHTML(f, obj) {
     const [k, label, type, opts] = f, v = obj[k], o = typeof opts === 'function' ? opts() : opts;
@@ -170,6 +170,7 @@
   $('bSave').onclick = save;
   $('bPlay').onclick = () => { save(); location.href = '../game/index.html'; };
   $('bExport').onclick = () => {
+    if (window.SFX) SFX.click();
     const json = JSON.stringify(D, null, 2);
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' })); a.download = 'game.json'; a.click();
     toast('game.json diekspor');

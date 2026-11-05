@@ -1,27 +1,43 @@
-# Final World (v1.3)
+# Final World (v1.4)
 
-RPG HTML5 turn-based + editor ala RPG Maker, dengan login Player / Developer.
-Terinspirasi struktur game J2ME "Final Fantasy" (FF - 1.jar). Data, nama, dan grafis di sini orisinal; aset/teks/musik asli tidak disalin.
+RPG turn-based bernuansa Final Fantasy klasik, lengkap dengan editor untuk membuat duniamu sendiri. Main langsung di browser, tanpa install.
 
-## Alur akun (localStorage)
-- Buka `index.html` → **Login / Register**.
-- **Player** → langsung ke game. **Developer** → langsung ke editor (tombol *Main* untuk uji coba).
-- Register developer butuh **kunci developer** (bawaan `FW-DEV`, ganti di Editor → Pengaturan).
-- Save game per akun. Logout ada di title game, menu Simpan, dan header editor.
-- Catatan: auth localStorage hanya memisahkan peran di sisi klien, bukan keamanan sungguhan. Untuk produksi pindahkan ke backend.
+## Tentang
 
-## Struktur
-- `index.html` login/register, `common.js` auth + cache gambar
-- `game/` engine · `editor/` Final World Maker
-- `assets/` tile 16px, sprite 4 arah (webp 48×64), musuh 32px, ikon item/equipment 32px, ikon event
-- `data/game.json` sumber data → `node build-data.js` → `data/game.js`
+Kamu memimpin party berisi 4 hero — Warrior, Thief, White Mage, dan Black Mage — menjelajahi Desa Awal, Hutan Gelap, dan Gua Ogre. Selesaikan 3 misi berantai, kalahkan bos Ogre, dan kumpulkan Gil serta equipment di sepanjang jalan.
 
-## Fitur v1.3
-- Semua aset gambar baru bergaya pixel art 16-bit (webp): 6 sprite sheet karakter (Warrior, Thief, White Mage, Black Mage, NPC Tetua, Pedagang), 3 musuh (Goblin, Wolf, Ogre), 9 tile world (rumput/air/jalan seamless), dan 10 ikon item/equipment baru (Potion, Ether, Phoenix Down, Kunci Kuno, Iron Sword, Dagger, Wooden Staff, Leather Armor, Iron Helm, Power Ring).
-- Ikon item/equipment tampil di toko, inventaris, menu equip, dan menu item saat battle. Ikon bisa diganti di Editor → Item / Equipment.
-- Format sheet karakter tetap **3 kolom × 4 baris** (kolom = diam, langkah A, langkah B; baris = bawah, atas, kiri, kanan), frame 16 px. Pergerakan antar-tile dihaluskan (tween 130 ms), frame berganti saat berjalan, diam saat berhenti. NPC/pedagang punya animasi idle.
-- Sheet lama (1 baris × 4 arah) dan gambar tunggal tetap didukung. Upload gambar sendiri di Editor (diperkecil otomatis).
-- Efek skill (slash, fire, ice, thunder, heal + angka damage, bisa dibatasi per class) dan kamera mengikuti pemain tetap seperti sebelumnya.
+Semua data, nama, dan grafis di game ini orisinal.
 
-## Deploy GitHub Pages
-Push ke `main` → Settings → Pages → Source: **GitHub Actions** (workflow sudah ada).
+## Cara Main
+
+1. Buka game, lalu **Login** atau **Register**. Akun **Player** langsung masuk ke game, akun **Developer** masuk ke editor.
+2. Pilih **Mulai Baru** atau **Lanjutkan** save terakhir.
+3. Jelajahi map, bicara dengan NPC, beli item di toko, dan kalahkan musuh di battle turn-based.
+4. Simpan progres dari menu **Simpan** kapan saja.
+
+## Fitur
+
+- **Battle turn-based klasik** — serang, pakai skill, item, atau lari. Efek skill beranimasi: Fire, Blizzard, Thunder, Cure, dan Backstab.
+- **4 class hero** dengan statistik dan skill masing-masing.
+- **3 map, 3 misi berantai, dan bos Ogre** sebagai ujian akhir.
+- **Efek suara** untuk semua aksi — menu, battle, skill, toko, dan kemenangan. Bisa dimatikan dari layar judul atau menu Simpan.
+- **Loading screen** dengan progres pemuatan gambar dan data.
+- **Final World Maker** — editor dalam game untuk membuat karakter, item, equipment, skill, musuh, misi, tileset, map, dan event sendiri, termasuk upload gambar.
+- **Save per akun**, progress tersimpan di perangkatmu.
+
+## Kontrol
+
+- **Keyboard:** panah / WASD bergerak, Enter / Z / Spasi konfirmasi, X batal, Esc menu.
+- **Layar sentuh:** D-pad dan tombol A / B / MENU di bawah layar.
+
+## Yang Baru di v1.4
+
+- Loading screen halus saat memuat data dan gambar.
+- Efek suara untuk semua aksi, dengan tombol mute.
+- Animasi skill spell lebih besar dan jelas, lengkap dengan kilat layar dan getaran.
+- Perbaikan bug: gambar keempat anggota party kini tampil semua di menu Status.
+- Tampilan editor lebih ringkas dan padat.
+
+## Teknologi
+
+Dibangun dengan HTML, CSS, dan JavaScript murni — tanpa framework dan tanpa proses build. Cukup buka di browser modern dan main.
