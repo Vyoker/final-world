@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   const { Auth, IMG } = FW;
-  const sess = Auth.require('developer'); if (!sess) return;
+  const sess = Auth.require(); if (!sess) return;
   const $ = (id) => document.getElementById(id);
   const KEY = 'fw_data';
   let D;
@@ -12,7 +12,7 @@
   const SLOTS = ['weapon', 'armor', 'head', 'accessory'];
   const S = {
     classes: { title: 'Karakter / Class', get: () => D.classes, fields: [['id', 'ID', 'text'], ['name', 'Nama', 'text'], ['hp', 'HP', 'number'], ['mp', 'MP', 'number'], ['atk', 'ATK', 'number'], ['def', 'DEF', 'number'], ['mag', 'MAG', 'number'], ['spd', 'SPD', 'number'], ['color', 'Warna', 'color'], ['sprite', 'Sprite jalan (sheet 3 kolom frame × 4 baris arah: bawah, atas, kiri, kanan)', 'img', { w: 192, h: 256 }]], blank: () => ({ sprite: '', id: 'cls' + Date.now() % 10000, name: 'Class Baru', hp: 25, mp: 5, atk: 5, def: 3, mag: 3, spd: 5, color: '#cccccc' }) },
-    items: { title: 'Item', get: () => D.items, fields: [['id', 'ID', 'text'], ['name', 'Nama', 'text'], ['type', 'Tipe', 'select', ['consumable', 'key']], ['effect', 'Efek', 'select', ['heal', 'mp', 'revive', 'none']], ['value', 'Nilai', 'number'], ['price', 'Harga', 'number'], ['desc', 'Deskripsi', 'textarea'], ['img', 'Ikon item (maks 32px)', 'img', { w: 32, h: 32 }]], blank: () => ({ id: 'item' + Date.now() % 10000, name: 'Item Baru', type: 'consumable', effect: 'heal', value: 10, price: 10, desc: '' }) },
+    items: { title: 'Item', get: () => D.items, fields: [['id', 'ID', 'text'], ['name', 'Nama', 'text'], ['type', 'Tipe', 'select', ['consumable', 'key', 'material']], ['effect', 'Efek', 'select', ['heal', 'mp', 'revive', 'none']], ['value', 'Nilai', 'number'], ['price', 'Harga', 'number'], ['desc', 'Deskripsi', 'textarea'], ['img', 'Ikon item (maks 32px)', 'img', { w: 32, h: 32 }]], blank: () => ({ id: 'item' + Date.now() % 10000, name: 'Item Baru', type: 'consumable', effect: 'heal', value: 10, price: 10, desc: '' }) },
     equipment: { title: 'Equipment', get: () => D.equipment, fields: [['id', 'ID', 'text'], ['name', 'Nama', 'text'], ['slot', 'Slot', 'select', SLOTS], ['atk', 'ATK', 'number'], ['def', 'DEF', 'number'], ['mag', 'MAG', 'number'], ['spd', 'SPD', 'number'], ['price', 'Harga', 'number'], ['classes', 'Class (kosong = semua)', 'multi', () => ids(D.classes)], ['img', 'Ikon equipment (maks 32px)', 'img', { w: 32, h: 32 }]], blank: () => ({ id: 'eq' + Date.now() % 10000, name: 'Equip Baru', slot: 'weapon', atk: 1, def: 0, mag: 0, spd: 0, price: 50, classes: [] }) },
     skills: { title: 'Skill', get: () => D.skills, fields: [['id', 'ID', 'text'], ['name', 'Nama', 'text'], ['type', 'Tipe', 'select', ['damage', 'heal']], ['mp', 'Biaya MP', 'number'], ['power', 'Power', 'number'], ['fx', 'Efek visual', 'select', ['slash', 'fire', 'ice', 'thunder', 'heal']], ['classes', 'Class pemakai (kosong = semua)', 'multi', () => ids(D.classes)]], blank: () => ({ id: 'sk' + Date.now() % 10000, name: 'Skill Baru', mp: 3, power: 10, type: 'damage', fx: 'fire', classes: [] }) },
     enemies: { title: 'Musuh', get: () => D.enemies, fields: [['id', 'ID', 'text'], ['name', 'Nama', 'text'], ['hp', 'HP', 'number'], ['atk', 'ATK', 'number'], ['def', 'DEF', 'number'], ['spd', 'SPD', 'number'], ['exp', 'EXP', 'number'], ['gold', 'Gil', 'number'], ['color', 'Warna', 'color'], ['boss', 'Bos', 'bool'], ['img', 'Gambar musuh (maks 96px)', 'img', { w: 96, h: 96 }]], blank: () => ({ img: '', id: 'en' + Date.now() % 10000, name: 'Musuh Baru', hp: 20, atk: 6, def: 2, spd: 4, exp: 5, gold: 8, color: '#aa4444' }) },
@@ -22,6 +22,18 @@
 
   function toast(t) { const e = $('toast'); e.textContent = t; e.className = 'on'; setTimeout(() => (e.className = ''), 1400); }
   function save() { localStorage.setItem(KEY, JSON.stringify(D)); if (window.SFX) SFX.save(); toast('Tersimpan'); }
+  // ---------- dunia buatan (slot 2-3): snapshot draft map + misi ke slot dunia ----------
+  const WKEY = 'fw_worlds_' + sess.name;
+  function worlds() { try { return JSON.parse(localStorage.getItem(WKEY)) || {}; } catch (e) { return {}; } }
+  function snapshotWorld(slot) {
+    const w = worlds(), name = slot === 2 ? 'Dunia Buatan 2' : 'Dunia Buatan 3', prev = w[slot] || {};
+    if (prev.maps && !confirm(name + ' sudah ada. Timpa dengan draft saat ini?')) return;
+    w[slot] = { slot, kind: 'custom', name, mode: prev.mode || 'survival', difficulty: prev.difficulty || 'medium', maps: JSON.parse(JSON.stringify(D.maps)), quests: JSON.parse(JSON.stringify(D.quests)), startMap: D.meta.startMap, startX: D.meta.startX, startY: D.meta.startY };
+    localStorage.setItem(WKEY, JSON.stringify(w));
+    if (window.SFX) SFX.save();
+    toast(name + ' tersimpan — bisa dimainkan dari layar judul');
+    render();
+  }
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
 
   function renderTabs() {
@@ -155,10 +167,14 @@
     $('main').querySelectorAll('[data-m]').forEach((el) => el.addEventListener('change', () => { m[el.dataset.m] = el.type === 'number' ? +el.value : el.value; }));
     $('party').onchange = (e) => { D.party = [...e.target.selectedOptions].map((o) => o.value).slice(0, 4); };
     const us = Auth.users(), box = document.createElement('div'); box.className = 'form';
-    box.innerHTML = `<b>Akun & keamanan</b><label>Kunci developer (untuk register developer baru)</label><div class="row"><input id="dkey" value="${esc(Auth.devKey())}"><button id="dkSave" type="button">Ubah</button></div><label>Daftar akun</label>` + Object.keys(us).map((n) => `<div class="ev">${esc(n)} — ${us[n].role} ${n === sess.name ? '(kamu)' : `<button class="dng" data-du="${esc(n)}" type="button" style="float:right;padding:3px 8px">Hapus</button>`}</div>`).join('');
+    box.innerHTML = `<b>Akun</b><label>Daftar akun</label>` + Object.keys(us).map((n) => `<div class="ev">${esc(n)} ${n === sess.name ? '(kamu)' : `<button class="dng" data-du="${esc(n)}" type="button" style="float:right;padding:3px 8px">Hapus</button>`}</div>`).join('');
     $('main').appendChild(box);
-    $('dkSave').onclick = () => { if ($('dkey').value.length < 4) return toast('Min 4 karakter'); Auth.setDevKey($('dkey').value); toast('Kunci diubah'); };
     box.querySelectorAll('[data-du]').forEach((b) => (b.onclick = () => { if (confirm('Hapus akun ' + b.dataset.du + ' beserta save-nya?')) { Auth.deleteUser(b.dataset.du); render(); } }));
+    // dunia buatan: snapshot draft ke slot 2 / 3
+    const w = worlds(), wbox = document.createElement('div'); wbox.className = 'form';
+    wbox.innerHTML = `<b>Dunia Buatan</b><div class="small">Simpan map & misi draft saat ini sebagai dunia yang bisa dimainkan dari layar judul. Mode dan kesulitan dunia diatur saat pertama kali dimainkan.</div>` + [2, 3].map((s) => `<div class="ev">Slot ${s} — ${w[s] ? esc(w[s].name) + ' (' + (w[s].maps || []).length + ' map, ' + (w[s].quests || []).length + ' misi)' : 'Kosong'} <button data-ws="${s}" type="button" style="float:right;padding:3px 8px">Simpan ke Dunia ${s}</button></div>`).join('');
+    $('main').appendChild(wbox);
+    wbox.querySelectorAll('[data-ws]').forEach((b) => (b.onclick = () => snapshotWorld(+b.dataset.ws)));
   }
 
   function render() {

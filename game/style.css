@@ -53,6 +53,17 @@ button{font-family:inherit}
 @keyframes shk{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
 .enemy .spr{image-rendering:pixelated;border:0;background:none;border-radius:0;display:block;margin:0 auto 2px}
 #title .ghost{background:transparent;border:1px solid #9fb0ff;font-size:13px;padding:8px}
+#worldList{display:flex;flex-direction:column;gap:6px;width:280px;max-width:92vw}
+.wslot{width:100%;text-align:left;padding:10px;background:#0a1040;color:#fff;border:1px solid #6b7bff;border-radius:6px;font-size:13px;line-height:1.4}
+.wslot.on{background:#2b3bd0;border-color:#ffd54f}
+.wslot .small{display:block}
+#worldDetail{width:280px;max-width:92vw;background:linear-gradient(#1b2a8f,#0d1553);border:2px solid #fff;border-radius:6px;padding:10px;font-size:13px;line-height:1.4}
+#worldDetail:empty{display:none}
+#worldDetail .seg{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0 8px}
+#worldDetail .seg button{flex:1;padding:7px 4px;font-size:12px;background:#0a1040;color:#fff;border:1px solid #6b7bff;border-radius:4px;min-width:52px}
+#worldDetail .seg button.on{background:#2b3bd0;border-color:#ffd54f}
+#worldDetail .go2{width:100%;margin-top:8px;padding:11px;font-size:14px;background:#2b3bd0;color:#fff;border:2px solid #fff;border-radius:6px}
+#worldDetail .lbl{font-size:11px;opacity:.8;margin-top:6px}
 #loading{position:absolute;inset:0;background:radial-gradient(#1b2a8f,#05061a);display:flex;align-items:center;justify-content:center;z-index:10;transition:opacity .45s ease}
 #loading.done{opacity:0;pointer-events:none}
 #loading .ld-in{display:flex;flex-direction:column;align-items:center;gap:12px;width:240px}

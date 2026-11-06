@@ -1,4 +1,4 @@
-/* Final World engine v1.4 — data driven. Data: localStorage 'fw_data' (dari editor) atau window.GAME_DATA. */
+/* Final World engine v1.5 — data driven. Data: localStorage 'fw_data' (dari editor) atau window.GAME_DATA. */
 (function () {
   'use strict';
   const { Auth, IMG } = FW;
@@ -6,19 +6,20 @@
   const $ = (id) => document.getElementById(id);
   const TS = 16, MOVE_MS = 130;
   const cv = $('cv'), ctx = cv.getContext('2d');
-  const SAVE_KEY = Auth.saveKey(sess.name), DATA_KEY = 'fw_data';
+  const DATA_KEY = 'fw_data';
+  const saveKey = (slot) => Auth.saveKey(sess.name) + '_' + slot;
 
   // ---------- data ----------
-  let D;
-  try { D = JSON.parse(localStorage.getItem(DATA_KEY)) || window.GAME_DATA; } catch (e) { D = window.GAME_DATA; }
+  let baseD;
+  try { baseD = JSON.parse(localStorage.getItem(DATA_KEY)) || window.GAME_DATA; } catch (e) { baseD = window.GAME_DATA; }
+  let D = baseD;
   const by = (arr, id) => arr.find((o) => o.id === id);
   const itemOf = (id) => by(D.items, id) || by(D.equipment, id);
   const icon = (it, sz) => it && it.img ? `<img src="${IMG.resolve(it.img)}" style="width:${sz || 20}px;height:${sz || 20}px;image-rendering:pixelated;vertical-align:-4px"> ` : '';
   $('gtitle').textContent = D.meta.title || 'Final World';
   document.title = D.meta.title || 'Final World';
-  $('who').textContent = 'Halo, ' + sess.name + ' (' + sess.role + ')';
+  $('who').textContent = 'Halo, ' + sess.name;
   $('btnLogout').onclick = () => Auth.logout();
-  if (sess.role === 'developer') $('lnkEditor').classList.remove('hidden');
   // suara: aktifkan konteks audio saat interaksi pertama; tombol mute di layar judul
   addEventListener('pointerdown', () => SFX.unlock(), { once: true });
   addEventListener('keydown', () => SFX.unlock(), { once: true });
@@ -26,6 +27,29 @@
   const syncSoundBtn = () => { if (btnSound) btnSound.textContent = 'Suara: ' + (SFX.muted ? 'Mati' : 'Nyala'); };
   syncSoundBtn();
   if (btnSound) btnSound.onclick = () => { SFX.toggle(); syncSoundBtn(); if (!SFX.muted) SFX.click(); };
+
+  // ---------- dunia v1.5: 3 slot, mode Survival/Creative, kesulitan, siang/malam ----------
+  const WKEY = 'fw_worlds_' + sess.name;
+  const DIFF = { easy: { mult: 0.8, label: 'Easy' }, medium: { mult: 1, label: 'Medium' }, hard: { mult: 1.3, label: 'Hard' } };
+  function loadWorlds() { try { return JSON.parse(localStorage.getItem(WKEY)) || {}; } catch (e) { return {}; } }
+  function saveWorlds(w) { localStorage.setItem(WKEY, JSON.stringify(w)); }
+  function phaseNow() { return new Date().getHours() % 2 === 0 ? 'day' : 'night'; }
+  function phaseMinsLeft() { return 60 - new Date().getMinutes(); }
+  function diffMult() { return (DIFF[(S && S.world && S.world.difficulty) || 'medium'] || DIFF.medium).mult; }
+  function isCreative() { return !!(S && S.world && S.world.mode === 'creative'); }
+  // runtime D: salinan base + isi dunia (map hasil generate / snapshot Maker)
+  function applyWorld(world) {
+    D = JSON.parse(JSON.stringify(baseD));
+    if (world.kind === 'basic') {
+      const gen = FWGen.generate(world.seed || 1);
+      D.maps = [gen.map]; D.quests = gen.quests;
+      D.meta.startMap = gen.map.id; D.meta.startX = gen.startX; D.meta.startY = gen.startY;
+    } else if (world.kind === 'custom' && world.maps) {
+      D.maps = JSON.parse(JSON.stringify(world.maps));
+      D.quests = JSON.parse(JSON.stringify(world.quests || []));
+      D.meta.startMap = world.startMap; D.meta.startX = world.startX; D.meta.startY = world.startY;
+    }
+  }
 
   // ---------- state ----------
   let S = null, mode = 'title', dlgQueue = [], dlgDone = null;
@@ -44,14 +68,25 @@
     for (const slot in m.equip) { const e = by(D.equipment, m.equip[slot]); if (e) { s.atk += e.atk || 0; s.def += e.def || 0; s.mag += e.mag || 0; s.spd += e.spd || 0; } }
     return s;
   }
-  function newGame() {
-    S = { map: D.meta.startMap, x: D.meta.startX, y: D.meta.startY, gold: D.meta.gold || 0, steps: 0, face: 'down', party: D.party.map(mkMember), inv: { potion: 3 }, flags: {}, quests: {}, qdone: {}, kills: {} };
+  function newGame(world) {
+    applyWorld(world);
+    S = { world: { slot: world.slot, kind: world.kind, mode: world.mode, difficulty: world.difficulty, seed: world.seed || 0 }, map: D.meta.startMap, x: D.meta.startX, y: D.meta.startY, gold: D.meta.gold || 0, steps: 0, face: 'down', party: D.party.map(mkMember), inv: { potion: 3 }, flags: {}, quests: {}, qdone: {}, kills: {}, gather: {}, phase: phaseNow() };
     S.party.forEach((m) => { const b = base(m); m.hp = b.maxhp; m.mp = b.maxmp; });
     if (D.quests.length) startQuest(D.quests[0].id);
+    save();
     mode = 'explore'; $('title').classList.add('hidden'); hud();
   }
-  const save = () => localStorage.setItem(SAVE_KEY, JSON.stringify(S));
-  function load() { const raw = localStorage.getItem(SAVE_KEY); if (!raw) return false; S = JSON.parse(raw); mode = 'explore'; $('title').classList.add('hidden'); hud(); return true; }
+  const save = () => { if (S && S.world) localStorage.setItem(saveKey(S.world.slot), JSON.stringify(S)); };
+  function load(slot) {
+    const raw = localStorage.getItem(saveKey(slot)); if (!raw) return false;
+    const w = loadWorlds()[slot]; if (!w) return false;
+    applyWorld(w);
+    S = JSON.parse(raw);
+    if (!S.world) S.world = { slot, kind: w.kind, mode: w.mode, difficulty: w.difficulty, seed: w.seed || 0 };
+    if (!S.gather) S.gather = {};
+    S.phase = phaseNow();
+    mode = 'explore'; $('title').classList.add('hidden'); hud(); return true;
+  }
 
   // ---------- map ----------
   const curMap = () => by(D.maps, S.map);
@@ -60,7 +95,7 @@
   function solid(map, x, y) {
     const t = tileAt(map, x, y); if (t === undefined) return true;
     const d = D.tileset[t]; if (d && d.solid) return true;
-    const ev = eventAt(map, x, y); return !!(ev && ['npc', 'shop', 'boss', 'chest', 'heal'].includes(ev.kind));
+    const ev = eventAt(map, x, y); return !!(ev && ['npc', 'shop', 'boss', 'chest', 'heal', 'gather'].includes(ev.kind));
   }
 
   // ---------- drawing ----------
@@ -69,7 +104,7 @@
     const r = IMG.rect(im, dir, frame); ctx.drawImage(im, r[0], r[1], r[2], r[3], px, py, size, size); return true;
   }
   const EV_IMG = { npc: 'assets/chars/npc.webp', shop: 'assets/chars/merchant.webp', chest: 'assets/events/chest.png', heal: 'assets/events/heal.png' };
-  const EV_COL = { npc: '#ffcc80', shop: '#ffd54f', chest: '#a1662f', boss: '#ff9800', heal: '#e0e0e0', warp: 'rgba(255,255,255,.35)' };
+  const EV_COL = { npc: '#ffcc80', shop: '#ffd54f', chest: '#a1662f', boss: '#ff9800', heal: '#e0e0e0', warp: 'rgba(255,255,255,.35)', gather: '#8bc34a' };
   function draw() {
     ctx.imageSmoothingEnabled = false; ctx.fillStyle = '#000'; ctx.fillRect(0, 0, cv.width, cv.height);
     if (!S || mode === 'title') return;
@@ -95,8 +130,9 @@
     const lead = by(D.classes, S.party[0].cid), fr = moving ? (mp < 0.5 ? (S.steps % 2 ? 1 : 2) : 0) : 0;
     if (!drawSheet(lead.sprite, DIR[S.face || 'down'], fr, Math.round(vx * TS), Math.round(vy * TS), TS)) { ctx.fillStyle = lead.color; ctx.fillRect(vx * TS + 3, vy * TS + 1, 10, 14); }
     ctx.restore();
+    if (phaseNow() === 'night') { ctx.fillStyle = 'rgba(8,10,48,0.35)'; ctx.fillRect(0, 0, cv.width, cv.height); }
   }
-  function hud() { $('hud').textContent = S ? `${curMap().name}  Gil:${S.gold}` : ''; }
+  function hud() { if (!S) return; const ph = phaseNow(); $('hud').textContent = `${curMap().name}  Gil:${S.gold} · ${ph === 'day' ? 'Siang' : 'Malam'} ${phaseMinsLeft()}mnt`; }
 
   // ---------- loading screen: preload semua gambar, lalu fade out ----------
   function allImages() {
@@ -162,6 +198,7 @@
     delete S.quests[q.id]; S.qdone[q.id] = 1; S.gold += q.rewardGold || 0; (q.rewardItems || []).forEach((i) => addItem(i, 1));
     SFX.quest();
     pendingMsgs.push(`Misi selesai: ${q.name}`, `+${q.rewardGold || 0} Gil, +${q.rewardExp || 0} EXP`);
+    if (q.doneText) pendingMsgs.push(q.doneText);
     S.party.forEach((m) => gainExp(m, q.rewardExp || 0)); if (q.next) startQuest(q.next);
   }
   function flushMsgs(cb) { if (pendingMsgs.length) { const m = pendingMsgs; pendingMsgs = []; say(m, 'Sistem', cb); } else if (cb) cb(); }
@@ -180,6 +217,14 @@
     if (ev.kind === 'npc') { progress('talk', ev.id); say(ev.text || ['...'], ev.name, () => flushMsgs()); }
     else if (ev.kind === 'shop') openShop(ev);
     else if (ev.kind === 'chest') { S.flags[ev.flag || (S.map + ev.x + ev.y)] = 1; addItem(ev.item, 1); SFX.chest(); say(`Kamu mendapat ${itemOf(ev.item).name}!`, '', () => flushMsgs()); }
+    else if (ev.kind === 'gather') {
+      const uses = S.gather[ev.id] || 0;
+      if (uses >= 3) { say('Node ini sudah habis. Akan pulih saat siang/malam berganti.'); return; }
+      S.gather[ev.id] = uses + 1;
+      addItem(ev.res, 1); SFX.coin();
+      const nm = { wood: 'Kayu', stone: 'Batu', herb: 'Herbal' }[ev.res] || ev.res;
+      say(`Mendapat ${nm}! (${uses + 1}/3)`);
+    }
     else if (ev.kind === 'heal') {
       const p = ev.price || 0;
       openPanel(`<b>${ev.name || 'Penginapan'}</b><p>Menginap ${p} Gil?</p><div class="row"><button class="opt" data-a="yes">Ya</button><button class="opt" data-a="no">Tidak</button></div>`);
@@ -216,16 +261,26 @@
   // ---------- menu ----------
   function openMenu(tab) {
     tab = tab || 'party';
-    const tabs = ['party', 'items', 'equip', 'quest', 'save'], label = { party: 'Status', items: 'Item', equip: 'Equip', quest: 'Misi', save: 'Simpan' };
+    const tabs = ['party', 'items', 'equip', 'craft', 'quest', 'save'], label = { party: 'Status', items: 'Item', equip: 'Equip', craft: 'Craft', quest: 'Misi', save: 'Simpan' };
     let h = `<div class="tabs">${tabs.map((t) => `<button data-a="tab" data-b="${t}" class="${t === tab ? 'on' : ''}">${label[t]}</button>`).join('')}<button data-a="close">X</button></div><div class="small">Gil: ${S.gold}</div>`;
     if (tab === 'party') h += S.party.map((m) => { const b = base(m), c = by(D.classes, m.cid); return `<div class="box" style="margin:4px 0"><canvas class="face" data-s="${c.sprite || ''}" data-c="${c.color || '#888'}" width="16" height="16"></canvas> <b>${m.name}</b> Lv${m.lv} <span class="small">EXP ${m.exp}/${m.lv * 30}</span><br>HP ${m.hp}/${b.maxhp} MP ${m.mp}/${b.maxmp}<br><span class="small">ATK ${b.atk} DEF ${b.def} MAG ${b.mag} SPD ${b.spd}</span></div>`; }).join('');
     else if (tab === 'items') { const ids = Object.keys(S.inv).filter((i) => S.inv[i] > 0); h += ids.length ? ids.map((i) => { const it = itemOf(i); return `<button class="opt" data-a="use" data-b="${i}">${icon(it)}${it.name} x${S.inv[i]}<br><span class="small">${it.desc || ''}</span></button>`; }).join('') : '<p>Kosong.</p>'; }
     else if (tab === 'equip') h += S.party.map((m, i) => `<div class="box" style="margin:4px 0"><b>${m.name}</b>` + ['weapon', 'armor', 'head', 'accessory'].map((s) => { const e = by(D.equipment, m.equip[s]); return `<button class="opt" data-a="slot" data-b="${i}:${s}">${s}: ${e ? e.name : '-'}</button>`; }).join('') + '</div>').join('');
+    else if (tab === 'craft') {
+      const free = isCreative();
+      h += '<div class="small">Bahan: ' + ['wood', 'stone', 'herb', 'hide'].map((id) => `${itemOf(id).name} ${S.inv[id] || 0}`).join(' · ') + (free ? ' (Creative: gratis)' : '') + '</div>';
+      h += (D.recipes || []).map((r) => {
+        const it = itemOf(r.result); if (!it) return '';
+        const needs = Object.keys(r.needs).map((id) => `${itemOf(id).name} ${S.inv[id] || 0}/${r.needs[id]}`).join(', ');
+        const ok = free || Object.keys(r.needs).every((id) => (S.inv[id] || 0) >= r.needs[id]);
+        return `<button class="opt" data-a="craft" data-b="${r.id}" ${ok ? '' : 'disabled'}>${icon(it)}${it.name}<br><span class="small">${needs}</span></button>`;
+      }).join('') || '<p>Belum ada resep.</p>';
+    }
     else if (tab === 'quest') {
       const act = Object.keys(S.quests).map((id) => { const q = by(D.quests, id); return q ? `<div class="box" style="margin:4px 0"><b>${q.name}</b> (${S.quests[id].n}/${q.count})<br><span class="small">${q.desc}</span></div>` : ''; }).join('');
       const done = Object.keys(S.qdone).map((id) => { const q = by(D.quests, id); return q ? `<div class="small">✔ ${q.name}</div>` : ''; }).join('');
       h += (act || '<p>Tidak ada misi aktif.</p>') + done;
-    } else if (tab === 'save') h += '<button class="opt" data-a="save">Simpan Game</button><button class="opt" data-a="sound">Suara: ' + (SFX.muted ? 'Mati' : 'Nyala') + '</button><button class="opt" data-a="title">Kembali ke Judul</button><button class="opt" data-a="logout">Logout</button>';
+    } else if (tab === 'save') h += '<button class="opt" data-a="save">Simpan Game</button><button class="opt" data-a="sound">Suara: ' + (SFX.muted ? 'Mati' : 'Nyala') + '</button><button class="opt" data-a="maker">Buka Maker (Creative)</button><button class="opt" data-a="title">Kembali ke Judul</button><button class="opt" data-a="logout">Logout</button>';
     openPanel(h);
     // gambar wajah party: gambar saat sudah siap, kalau masih dimuat tunggu onload (bug v1.3: hanya warrior yang muncul karena sheet lain belum selesai dimuat saat menu dibuka)
     const drawFace = (c) => {
@@ -245,6 +300,14 @@
       if (a === 'close') { SFX.back(); return closePanel(); } if (a === 'tab') { SFX.click(); return openMenu(b); }
       if (a === 'save') { save(); SFX.save(); closePanel(); return say('Game tersimpan.'); }
       if (a === 'sound') { SFX.toggle(); syncSoundBtn(); if (!SFX.muted) SFX.click(); return openMenu('save'); }
+      if (a === 'maker') { save(); location.href = '../editor/index.html'; }
+      if (a === 'craft') {
+        const r = (D.recipes || []).find((x) => x.id === b); if (!r) return openMenu('craft');
+        const free = isCreative();
+        if (!free && !Object.keys(r.needs).every((id) => (S.inv[id] || 0) >= r.needs[id])) { SFX.error(); return openMenu('craft'); }
+        if (!free) for (const id in r.needs) S.inv[id] -= r.needs[id];
+        addItem(r.result, 1); SFX.coin(); return openMenu('craft');
+      }
       if (a === 'title') location.reload(); if (a === 'logout') { save(); Auth.logout(); }
       if (a === 'use') { SFX.click(); return useItemMenu(b); } if (a === 'slot') { SFX.click(); return equipMenu(b); }
     });
@@ -332,7 +395,8 @@
   let B = null;
   function startBattle(enemyIds, onWin) {
     mode = 'battle'; SFX.battle();
-    B = { foes: enemyIds.map((id, i) => Object.assign({}, by(D.enemies, id), { cur: by(D.enemies, id).hp, i })), onWin, actor: undefined, phase: null };
+    const mult = diffMult();
+    B = { foes: enemyIds.map((id, i) => { const b = by(D.enemies, id); return Object.assign({}, b, { hp: Math.max(1, Math.round(b.hp * mult)), atk: Math.max(1, Math.round(b.atk * mult)), def: Math.max(0, Math.round(b.def * mult)), cur: Math.max(1, Math.round(b.hp * mult)), i }); }), onWin, actor: undefined, phase: null };
     $('battle').classList.remove('hidden'); renderBattle('Musuh muncul!'); setTimeout(nextActor, 500);
   }
   const alive = (arr) => arr.filter((x) => (x.cur !== undefined ? x.cur > 0 : x.hp > 0));
@@ -416,13 +480,19 @@
     const foes = B.foes; $('battle').classList.add('hidden'); mode = 'explore';
     if (win === true) {
       SFX.victory();
-      let g = 0, x = 0; foes.forEach((e) => { g += e.gold || 0; x += e.exp || 0; progress('kill', e.id); });
+      let g = 0, x = 0, hides = 0; foes.forEach((e) => { g += e.gold || 0; x += e.exp || 0; if (e.id === 'wolf') hides++; else if (e.id === 'goblin' && Math.random() < 0.5) hides++; progress('kill', e.id); });
+      if (hides) addItem('hide', hides);
       S.gold += g; const live = S.party.filter((m) => m.hp > 0); live.forEach((m) => gainExp(m, Math.ceil(x / live.length)));
-      pendingMsgs.unshift(`Menang! +${g} Gil, +${x} EXP`); if (B.onWin) B.onWin(); flushMsgs(); hud();
+      pendingMsgs.unshift(`Menang! +${g} Gil, +${x} EXP` + (hides ? `, +${hides} Kulit` : '')); if (B.onWin) B.onWin(); flushMsgs(); hud();
     } else if (win === false) {
       SFX.defeat();
-      S.gold = Math.floor(S.gold / 2); S.party.forEach((m) => { const b = base(m); m.hp = b.maxhp; m.mp = b.maxmp; });
-      warp(D.meta.startMap, D.meta.startX, D.meta.startY); say('Party kalah... Kamu terbangun di desa dengan setengah Gil.');
+      if (isCreative()) {
+        S.party.forEach((m) => { const b = base(m); m.hp = b.maxhp; m.mp = b.maxmp; });
+        say('Mode Creative: party pulih, tanpa penalti.');
+      } else {
+        S.gold = Math.floor(S.gold / 2); S.party.forEach((m) => { const b = base(m); m.hp = b.maxhp; m.mp = b.maxmp; });
+        warp(D.meta.startMap, D.meta.startX, D.meta.startY); say('Party kalah... Kamu terbangun di desa dengan setengah Gil.');
+      }
     }
     B = null;
   }
@@ -433,7 +503,7 @@
     const nx = S.x + d[0], ny = S.y + d[1], map = curMap(); if (solid(map, nx, ny)) return;
     S.fx = S.x; S.fy = S.y; S.mvStart = performance.now(); S.x = nx; S.y = ny; S.steps++;
     const ev = eventAt(map, nx, ny); if (ev && ev.kind === 'warp') return runEvent(ev);
-    if (map.encounter > 0 && map.enemies && map.enemies.length && Math.random() < 1 / map.encounter) {
+    if (!isCreative() && map.encounter > 0 && map.enemies && map.enemies.length && Math.random() < (phaseNow() === 'night' ? 0.70 : 0.45)) {
       const ids = []; for (let i = 0, n = rnd(1, 3); i < n; i++) ids.push(map.enemies[rnd(0, map.enemies.length - 1)]); startBattle(ids);
     }
   }
@@ -453,11 +523,78 @@
     b.addEventListener('touchstart', on, { passive: false }); b.addEventListener('touchend', off, { passive: false }); b.addEventListener('touchcancel', off);
     b.addEventListener('mousedown', on); b.addEventListener('mouseup', off); b.addEventListener('mouseleave', off);
   });
-  $('btnNew').onclick = () => { SFX.select(); if (localStorage.getItem(SAVE_KEY) && !confirm('Save lama akan tertimpa saat kamu menyimpan. Lanjut mulai baru?')) return; newGame(); };
-  $('btnLoad').onclick = () => { SFX.select(); if (!load()) { SFX.error(); alert('Belum ada save.'); } };
+  // ---------- layar judul: pilih dunia + setup ----------
+  let selSlot = 1, setup = { mode: 'survival', difficulty: 'medium', seed: 0 };
+  function worldLabel(w) {
+    const d = DIFF[w.difficulty] || DIFF.medium;
+    return (w.mode === 'creative' ? 'Creative' : 'Survival') + ' · ' + d.label + (w.kind === 'basic' ? ' · Seed ' + w.seed : ' · ' + (w.maps || []).length + ' map');
+  }
+  function saveInfo(slot) {
+    try { const s = JSON.parse(localStorage.getItem(saveKey(slot))); return s ? `Gil ${s.gold} · Lv ${s.party[0].lv}` : ''; } catch (e) { return ''; }
+  }
+  function setupHtml(withSeed) {
+    const seg = (key, opts, cur) => `<div class="seg">${opts.map((o) => `<button data-set="${key}:${o[0]}" class="${cur === o[0] ? 'on' : ''}">${o[1]}</button>`).join('')}</div>`;
+    return `<div class="lbl">Mode dunia</div>${seg('mode', [['survival', 'Survival'], ['creative', 'Creative']], setup.mode)}
+      <div class="lbl">Kesulitan (statistik musuh)</div>${seg('difficulty', [['easy', 'Easy'], ['medium', 'Medium'], ['hard', 'Hard']], setup.difficulty)}
+      ${withSeed ? `<div class="lbl">Seed map acak (1-10)</div><div class="seg">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => `<button data-set="seed:${n}" class="${setup.seed === n ? 'on' : ''}">${n}</button>`).join('')}<button data-set="seed:0" class="${setup.seed === 0 ? 'on' : ''}">Acak</button></div>` : ''}`;
+  }
+  function renderTitle() {
+    const worlds = loadWorlds();
+    $('worldList').innerHTML = [1, 2, 3].map((n) => {
+      const w = worlds[n], name = n === 1 ? 'Dunia Basic' : 'Dunia Buatan ' + n;
+      return `<button class="wslot ${selSlot === n ? 'on' : ''}" data-slot="${n}"><b>${n}. ${w ? w.name : name}</b><span class="small">${w ? worldLabel(w) : (n === 1 ? 'Map acak, 1 misi: kalahkan Ogre' : 'Buat di Maker')}</span></button>`;
+    }).join('');
+    const w = worlds[selSlot], det = $('worldDetail');
+    const hasSave = !!localStorage.getItem(saveKey(selSlot));
+    if (w && hasSave) {
+      det.innerHTML = `<b>${w.name}</b><br><span class="small">${worldLabel(w)}</span><br><span class="small">${saveInfo(selSlot)}</span><button class="go2" data-w="load">Lanjutkan</button><button class="go2" data-w="new">Mulai Baru</button>`;
+    } else if (w) {
+      det.innerHTML = `<b>${w.name}</b><br><span class="small">${worldLabel(w)}</span>${setupHtml(false)}<button class="go2" data-w="new">Mulai Baru</button>`;
+    } else if (selSlot === 1) {
+      det.innerHTML = `<b>Dunia Basic — Baru</b>${setupHtml(true)}<button class="go2" data-w="create">Buat Dunia & Mulai</button>`;
+    } else {
+      det.innerHTML = `<b>Dunia Buatan ${selSlot}</b><br><span class="small">Slot kosong. Buat map & misi di Maker, lalu simpan ke Dunia ${selSlot} dari menu Pengaturan.</span><button class="go2" data-w="maker">Buka Maker</button>`;
+    }
+  }
+  function selectSlot(n) {
+    selSlot = n;
+    const w = loadWorlds()[n];
+    setup = w ? { mode: w.mode, difficulty: w.difficulty, seed: w.seed || 0 } : { mode: 'survival', difficulty: 'medium', seed: 0 };
+    renderTitle();
+  }
+  $('worldList').onclick = (ev) => { const b = ev.target.closest('[data-slot]'); if (b) { SFX.click(); selectSlot(+b.dataset.slot); } };
+  $('worldDetail').onclick = (ev) => {
+    const b = ev.target.closest('[data-w], [data-set]'); if (!b) return;
+    if (b.dataset.set) {
+      const parts = b.dataset.set.split(':'), k = parts[0], v = parts[1];
+      if (k === 'seed') setup.seed = +v; else setup[k] = v;
+      SFX.click(); renderTitle(); return;
+    }
+    const a = b.dataset.w;
+    if (a === 'maker') { SFX.select(); location.href = '../editor/index.html'; return; }
+    if (a === 'load') { SFX.select(); if (!load(selSlot)) { SFX.error(); alert('Save tidak ditemukan.'); } return; }
+    if (a === 'new') {
+      SFX.select();
+      if (localStorage.getItem(saveKey(selSlot)) && !confirm('Save dunia ini akan tertimpa saat kamu menyimpan. Lanjut mulai baru?')) return;
+      const worlds = loadWorlds(), w = worlds[selSlot];
+      if (w && !localStorage.getItem(saveKey(selSlot))) { w.mode = setup.mode; w.difficulty = setup.difficulty; saveWorlds(worlds); }
+      newGame(worlds[selSlot]);
+      return;
+    }
+    if (a === 'create') {
+      SFX.select();
+      const worlds = loadWorlds();
+      const seed = setup.seed || (1 + Math.floor(Math.random() * 10));
+      const world = { slot: selSlot, kind: 'basic', name: 'Dunia Basic', mode: setup.mode, difficulty: setup.difficulty, seed };
+      worlds[selSlot] = world; saveWorlds(worlds);
+      newGame(world);
+    }
+  };
+  selectSlot(1);
 
   let last = 0;
   (function loop(t) {
+    if (S) { const ph = phaseNow(); if (S.phase !== ph) { S.phase = ph; S.gather = {}; hud(); } }
     if (mode === 'explore' && S && t - last > MOVE_MS) for (const d of ['up', 'down', 'left', 'right']) if (keys[d]) { tryMove(d); last = t; break; }
     draw(); requestAnimationFrame(loop);
   })(0);

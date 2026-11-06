@@ -1,7 +1,7 @@
 window.GAME_DATA = {
   "meta": {
     "title": "Final World",
-    "version": "1.4",
+    "version": "1.5",
     "startMap": "town",
     "startX": 7,
     "startY": 8,
@@ -103,6 +103,46 @@ window.GAME_DATA = {
       "price": 0,
       "desc": "Membuka pintu kuil.",
       "img": "assets/items/key.webp"
+    },
+    {
+      "id": "wood",
+      "name": "Kayu",
+      "type": "material",
+      "effect": "none",
+      "value": 0,
+      "price": 10,
+      "desc": "Bahan crafting dari pohon.",
+      "img": null
+    },
+    {
+      "id": "stone",
+      "name": "Batu",
+      "type": "material",
+      "effect": "none",
+      "value": 0,
+      "price": 10,
+      "desc": "Bahan crafting dari batu besar.",
+      "img": null
+    },
+    {
+      "id": "herb",
+      "name": "Herbal",
+      "type": "material",
+      "effect": "none",
+      "value": 0,
+      "price": 15,
+      "desc": "Bahan crafting dari semak.",
+      "img": null
+    },
+    {
+      "id": "hide",
+      "name": "Kulit",
+      "type": "material",
+      "effect": "none",
+      "value": 0,
+      "price": 20,
+      "desc": "Bahan crafting dari musuh yang kalah.",
+      "img": null
     }
   ],
   "equipment": [
@@ -554,5 +594,75 @@ window.GAME_DATA = {
       "solid": false,
       "img": "assets/tiles/cave.webp"
     }
-  }
+  },
+  "recipes": [
+    {
+      "id": "r_potion",
+      "result": "potion",
+      "needs": {
+        "herb": 2
+      }
+    },
+    {
+      "id": "r_ether",
+      "result": "ether",
+      "needs": {
+        "herb": 3
+      }
+    },
+    {
+      "id": "r_phoenix",
+      "result": "phoenix",
+      "needs": {
+        "herb": 2,
+        "hide": 1
+      }
+    },
+    {
+      "id": "r_sword1",
+      "result": "sword1",
+      "needs": {
+        "stone": 3,
+        "wood": 2
+      }
+    },
+    {
+      "id": "r_dagger1",
+      "result": "dagger1",
+      "needs": {
+        "stone": 2,
+        "wood": 1
+      }
+    },
+    {
+      "id": "r_staff1",
+      "result": "staff1",
+      "needs": {
+        "wood": 3
+      }
+    },
+    {
+      "id": "r_armor1",
+      "result": "armor1",
+      "needs": {
+        "hide": 3
+      }
+    },
+    {
+      "id": "r_helm1",
+      "result": "helm1",
+      "needs": {
+        "stone": 2,
+        "hide": 1
+      }
+    },
+    {
+      "id": "r_ring1",
+      "result": "ring1",
+      "needs": {
+        "stone": 2,
+        "wood": 1
+      }
+    }
+  ]
 };

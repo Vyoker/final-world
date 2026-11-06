@@ -4,7 +4,7 @@
 (function () {
   'use strict';
   const ROOT = /\/(game|editor)\//.test(location.pathname) ? '../' : '';
-  const USERS = 'fw_users', SESSION = 'fw_session', DEVKEY = 'fw_devkey';
+  const USERS = 'fw_users', SESSION = 'fw_session';
   const read = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } };
 
   // hash sinkron sederhana (cyrb53) + salt; cukup untuk demo localStorage
@@ -17,20 +17,16 @@
   }
   const Auth = {
     ROOT,
-    devKey() { return localStorage.getItem(DEVKEY) || 'FW-DEV'; },
-    setDevKey(k) { localStorage.setItem(DEVKEY, k); },
     users() { return read(USERS, {}); },
-    register(name, pass, role, devKey) {
+    register(name, pass) {
       name = (name || '').trim().toLowerCase();
       if (!/^[a-z0-9_]{3,16}$/.test(name)) return { ok: false, msg: 'Username 3-16 karakter (huruf kecil, angka, _).' };
       if ((pass || '').length < 4) return { ok: false, msg: 'Password minimal 4 karakter.' };
-      if (role !== 'player' && role !== 'developer') return { ok: false, msg: 'Peran tidak valid.' };
-      if (role === 'developer' && devKey !== Auth.devKey()) return { ok: false, msg: 'Kunci developer salah.' };
       const u = Auth.users(); if (u[name]) return { ok: false, msg: 'Username sudah dipakai.' };
-      u[name] = { h: hash(name + ':' + pass), role, created: Date.now() };
+      u[name] = { h: hash(name + ':' + pass), role: 'player', created: Date.now() };
       localStorage.setItem(USERS, JSON.stringify(u));
-      localStorage.setItem(SESSION, JSON.stringify({ name, role }));
-      return { ok: true, role };
+      localStorage.setItem(SESSION, JSON.stringify({ name, role: 'player' }));
+      return { ok: true, role: 'player' };
     },
     login(name, pass) {
       name = (name || '').trim().toLowerCase(); const u = Auth.users()[name];
@@ -40,15 +36,14 @@
     },
     logout() { localStorage.removeItem(SESSION); location.href = ROOT + 'index.html'; },
     session() { const s = read(SESSION, null); if (!s) return null; const u = Auth.users()[s.name]; return u ? { name: s.name, role: u.role } : null; },
-    home(role) { return ROOT + (role === 'developer' ? 'editor/index.html' : 'game/index.html'); },
-    /** Panggil di halaman terlindungi. role: 'any' | 'developer' */
-    require(role) {
+    home() { return ROOT + 'game/index.html'; },
+    /** Panggil di halaman terlindungi. Semua pemain bebas masuk game maupun editor (tanpa kunci). */
+    require() {
       const s = Auth.session();
       if (!s) { location.replace(ROOT + 'index.html'); return null; }
-      if (role === 'developer' && s.role !== 'developer') { location.replace(ROOT + 'game/index.html'); return null; }
       return s;
     },
-    deleteUser(name) { const u = Auth.users(); delete u[name]; localStorage.setItem(USERS, JSON.stringify(u)); localStorage.removeItem('fw_save_' + name); },
+    deleteUser(name) { const u = Auth.users(); delete u[name]; localStorage.setItem(USERS, JSON.stringify(u)); localStorage.removeItem('fw_save_' + name); for (let i = 1; i <= 3; i++) localStorage.removeItem('fw_save_' + name + '_' + i); localStorage.removeItem('fw_worlds_' + name); },
     saveKey(name) { return 'fw_save_' + name; }
   };
 

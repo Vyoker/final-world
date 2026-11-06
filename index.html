@@ -24,16 +24,11 @@ input,select{width:100%;padding:10px;background:#05082a;color:#fff;border:1px so
 <body>
 <div class="card">
   <h1>Final World</h1>
-  <div class="sub">Masuk untuk bermain atau mengembangkan</div>
+  <div class="sub">Masuk untuk bermain dan membuat duniamu</div>
   <div class="tabs"><button id="tLogin" class="on" type="button">Login</button><button id="tReg" type="button">Register</button></div>
   <form id="f" autocomplete="off">
     <label>Username</label><input id="u" autocapitalize="none" autocomplete="username">
     <label>Password</label><input id="p" type="password" autocomplete="current-password">
-    <div id="regBox" class="hide">
-      <label>Daftar sebagai</label>
-      <select id="role"><option value="player">Player (main game)</option><option value="developer">Developer (editor)</option></select>
-      <div id="keyBox" class="hide"><label>Kunci developer</label><input id="dk" type="password"><div class="hint">Bawaan: FW-DEV (bisa diganti di editor → Pengaturan).</div></div>
-    </div>
     <button class="go" id="go" type="submit">Login</button>
   </form>
   <div id="msg"></div>
@@ -42,20 +37,19 @@ input,select{width:100%;padding:10px;background:#05082a;color:#fff;border:1px so
 <script>
 (function () {
   const { Auth } = FW, $ = (i) => document.getElementById(i);
-  const s = Auth.session(); if (s) { location.replace(Auth.home(s.role)); return; }
+  const s = Auth.session(); if (s) { location.replace(Auth.home()); return; }
   let reg = false;
   function mode(r) {
     reg = r; $('tLogin').className = r ? '' : 'on'; $('tReg').className = r ? 'on' : '';
-    $('regBox').classList.toggle('hide', !r); $('go').textContent = r ? 'Buat Akun' : 'Login'; $('msg').textContent = '';
+    $('go').textContent = r ? 'Buat Akun' : 'Login'; $('msg').textContent = '';
     $('p').autocomplete = r ? 'new-password' : 'current-password';
   }
   $('tLogin').onclick = () => mode(false); $('tReg').onclick = () => mode(true);
-  $('role').onchange = () => $('keyBox').classList.toggle('hide', $('role').value !== 'developer');
   $('f').onsubmit = (e) => {
     e.preventDefault();
-    const r = reg ? Auth.register($('u').value, $('p').value, $('role').value, $('dk').value) : Auth.login($('u').value, $('p').value);
+    const r = reg ? Auth.register($('u').value, $('p').value) : Auth.login($('u').value, $('p').value);
     if (!r.ok) { $('msg').textContent = r.msg; return; }
-    location.href = Auth.home(r.role);
+    location.href = Auth.home();
   };
 })();
 </script>
