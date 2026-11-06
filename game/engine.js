@@ -1,4 +1,4 @@
-/* Final World engine v1.5.2 — data driven. Data: localStorage 'fw_data' (dari editor) atau window.GAME_DATA. */
+/* Final World engine v1.5.3 — data driven. Data: localStorage 'fw_data' (dari editor) atau window.GAME_DATA. */
 (function () {
   'use strict';
   const { Auth, IMG } = FW;
@@ -278,16 +278,30 @@
   }
 
   // ---------- menu ----------
+  let menuMsg = ''; // pesan sekali tampil di atas menu (mis. item gagal dipakai)
   function openMenu(tab) {
     tab = tab || 'party';
     const tabs = ['party', 'items', 'equip', 'craft', 'quest', 'save'], label = { party: 'Status', items: 'Item', equip: 'Equip', craft: 'Craft', quest: 'Misi', save: 'Simpan' };
     let h = `<div class="tabs">${tabs.map((t) => `<button data-a="tab" data-b="${t}" class="${t === tab ? 'on' : ''}">${label[t]}</button>`).join('')}<button data-a="close">X</button></div><div class="small">Gil: ${S.gold}</div>`;
+    if (menuMsg) { h += `<div class="small" style="color:#ffd54f">${menuMsg}</div>`; menuMsg = ''; }
     if (tab === 'party') h += S.party.map((m) => { const b = base(m), c = by(D.classes, m.cid); return `<div class="box" style="margin:4px 0"><canvas class="face" data-s="${c.sprite || ''}" data-c="${c.color || '#888'}" width="16" height="16"></canvas> <b>${m.name}</b> Lv${m.lv} <span class="small">EXP ${m.exp}/${m.lv * 30}</span><br>HP ${m.hp}/${b.maxhp} MP ${m.mp}/${b.maxmp}<br><span class="small">ATK ${b.atk} DEF ${b.def} MAG ${b.mag} SPD ${b.spd}</span></div>`; }).join('');
-    else if (tab === 'items') { const ids = Object.keys(S.inv).filter((i) => S.inv[i] > 0); h += ids.length ? ids.map((i) => { const it = itemOf(i); return `<button class="opt" data-a="use" data-b="${i}">${icon(it)}${it.name} x${S.inv[i]}<br><span class="small">${it.desc || ''}</span></button>`; }).join('') : '<p>Kosong.</p>'; }
+    else if (tab === 'items') {
+      const ids = Object.keys(S.inv).filter((i) => S.inv[i] > 0);
+      h += ids.length ? ids.map((i) => {
+        const it = itemOf(i); if (!it) return '';
+        const isEq = !!by(D.equipment, i);
+        // v1.5.3: bahan/kunci/peralatan BUKAN tombol pakai — tampil sebagai info, supaya tidak jadi tombol mati
+        if (isEq || it.effect === 'none') return `<div class="box" style="margin:3px 0">${icon(it)}${it.name} x${S.inv[i]}<br><span class="small">${isEq ? 'Peralatan — buka tab Equip' : (it.type === 'key' ? 'Kunci' : 'Bahan crafting')}</span></div>`;
+        return `<button class="opt" data-a="use" data-b="${i}">${icon(it)}${it.name} x${S.inv[i]}<br><span class="small">${it.desc || ''}</span></button>`;
+      }).join('') : '<p>Kosong.</p>';
+    }
     else if (tab === 'equip') h += S.party.map((m, i) => `<div class="box" style="margin:4px 0"><b>${m.name}</b>` + ['weapon', 'armor', 'head', 'accessory'].map((s) => { const e = by(D.equipment, m.equip[s]); return `<button class="opt" data-a="slot" data-b="${i}:${s}">${s}: ${e ? e.name : '-'}</button>`; }).join('') + '</div>').join('');
     else if (tab === 'craft') {
       const free = isCreative();
       h += '<div class="small">Bahan: ' + ['wood', 'stone', 'herb', 'hide'].map((id) => `${itemOf(id).name} ${S.inv[id] || 0}`).join(' · ') + (free ? ' (Creative: gratis)' : '') + '</div>';
+      // v1.5.3: kalau belum ada resep yang bisa dibuat, beri petunjuk cara dapat bahan (bukan tombol abu-abu semua tanpa penjelasan)
+      const anyOk = free || (D.recipes || []).some((r) => Object.keys(r.needs).every((id) => (S.inv[id] || 0) >= r.needs[id]));
+      if (!anyOk) h += '<div class="small" style="color:#ffd54f">Belum ada bahan. Cari node Kayu/Batu/Herbal di map dan tekan A di dekatnya.</div>';
       h += (D.recipes || []).map((r) => {
         const it = itemOf(r.result); if (!it) return '';
         const needs = Object.keys(r.needs).map((id) => `${itemOf(id).name} ${S.inv[id] || 0}/${r.needs[id]}`).join(', ');
@@ -336,7 +350,7 @@
     let h = `<b>${icon(it, 24)}${it.name}</b> — pakai ke:`;
     S.party.forEach((m, i) => { const b = base(m); h += `<button class="opt" data-a="to" data-b="${i}">${m.name} HP ${m.hp}/${b.maxhp} MP ${m.mp}/${b.maxmp}</button>`; });
     openPanel(h + '<button class="opt" data-a="back">Batal</button>');
-    bindPanel((a, b) => { if (a === 'back') return openMenu('items'); const m = S.party[+b]; if (applyItem(it, m, base(m))) S.inv[id]--; openMenu('items'); });
+    bindPanel((a, b) => { if (a === 'back') return openMenu('items'); const m = S.party[+b]; if (applyItem(it, m, base(m))) { S.inv[id]--; SFX.heal(); } else { SFX.error(); menuMsg = it.name + ' tidak bisa dipakai ke ' + m.name + ' sekarang.'; } openMenu('items'); });
   }
   function applyItem(it, m, bs) {
     if (it.effect === 'heal' && m.hp > 0 && m.hp < bs.maxhp) { m.hp = Math.min(bs.maxhp, m.hp + it.value); return true; }
@@ -555,7 +569,7 @@
     const seg = (key, opts, cur) => `<div class="seg">${opts.map((o) => `<button data-set="${key}:${o[0]}" class="${cur === o[0] ? 'on' : ''}">${o[1]}</button>`).join('')}</div>`;
     return `<div class="lbl">Mode dunia</div>${seg('mode', [['survival', 'Survival'], ['creative', 'Creative']], setup.mode)}
       <div class="lbl">Kesulitan (statistik musuh)</div>${seg('difficulty', [['easy', 'Easy'], ['medium', 'Medium'], ['hard', 'Hard']], setup.difficulty)}
-      ${withSeed ? `<div class="lbl">Seed map acak (1-10)</div><div class="seg">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => `<button data-set="seed:${n}" class="${setup.seed === n ? 'on' : ''}">${n}</button>`).join('')}<button data-set="seed:0" class="${setup.seed === 0 ? 'on' : ''}">Acak</button></div>` : ''}`;
+      ${withSeed ? `<div class="lbl">Seed map acak (1-10, kosong = acak)</div><div class="seedrow"><input id="seedIn" type="number" min="1" max="10" inputmode="numeric" placeholder="Acak" value="${setup.seed || ''}"><button class="opt" data-set="seed:0">Acak</button></div>` : ''}`;
   }
   function renderTitle() {
     const worlds = loadWorlds();
@@ -586,6 +600,9 @@
     const b = ev.target.closest('[data-w], [data-set]'); if (!b) return;
     if (b.dataset.set) {
       const parts = b.dataset.set.split(':'), k = parts[0], v = parts[1];
+      // simpan dulu seed yang sudah diketik supaya tidak hilang saat layar di-render ulang
+      const iv = parseInt(($('seedIn') || {}).value || '', 10);
+      if (!Number.isNaN(iv)) setup.seed = iv;
       if (k === 'seed') setup.seed = +v; else setup[k] = v;
       SFX.click(); renderTitle(); return;
     }
@@ -603,7 +620,8 @@
     if (a === 'create') {
       SFX.select();
       const worlds = loadWorlds();
-      const seed = setup.seed || (1 + Math.floor(Math.random() * 10));
+      const iv = parseInt(($('seedIn') || {}).value || '', 10);
+      const seed = (iv >= 1 && iv <= 10) ? iv : ((setup.seed >= 1 && setup.seed <= 10) ? setup.seed : (1 + Math.floor(Math.random() * 10)));
       const world = { slot: selSlot, kind: 'basic', name: 'Dunia Basic', mode: setup.mode, difficulty: setup.difficulty, seed };
       worlds[selSlot] = world; saveWorlds(worlds);
       newGame(world);
