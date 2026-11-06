@@ -1,7 +1,7 @@
 window.GAME_DATA = {
   "meta": {
     "title": "Final World",
-    "version": "1.5.1",
+    "version": "1.5.2",
     "startMap": "town",
     "startX": 7,
     "startY": 8,

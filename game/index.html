@@ -18,11 +18,50 @@
     <div id="title">
       <h1 id="gtitle">Final World</h1>
       <div id="who" class="small"></div>
-      <div id="worldList"></div>
-      <div id="worldDetail"></div>
-      <a id="lnkEditor" class="lnk" href="../editor/index.html">Buka Maker (Creative)</a>
-      <button id="btnSound" class="ghost">Suara: Nyala</button>
-      <button id="btnLogout" class="ghost">Logout</button>
+      <div id="menuHome">
+        <button id="btnPlay" class="mcbtn" type="button">Main</button>
+        <button id="btnSettings" class="mcbtn" type="button">Pengaturan</button>
+      </div>
+      <div id="menuWorlds" class="hidden">
+        <div id="worldList"></div>
+        <div id="worldDetail"></div>
+        <a id="lnkEditor2" class="lnk" href="../editor/index.html">Buka Maker (Creative)</a>
+        <button id="btnBackWorlds" class="ghost" type="button">Kembali</button>
+      </div>
+      <div id="menuSettings" class="hidden">
+        <div class="setbox">
+          <b>Akun</b>
+          <div id="accName" class="small"></div>
+          <button id="btnSound2" class="ghost" type="button">Suara: Nyala</button>
+          <button id="btnLogout2" class="ghost" type="button">Logout</button>
+          <button id="btnNewAcc" class="ghost" type="button">Buat Akun Baru</button>
+        </div>
+        <div class="setbox">
+          <b>Kredit</b>
+          <div class="small">Final World dikembangkan oleh VyokerDEV.<br>Game, grafis, dan suara orisinal.</div>
+        </div>
+        <div class="setbox">
+          <b>Changelog</b>
+          <div class="small">
+            v1.5.2 — Pengaman load save; judul baru gaya Minecraft (Main &amp; Pengaturan).<br>
+            v1.5.1 — Judul ringkas + scroll; joystick transparan mengambang; tombol A/B miring.<br>
+            v1.5 — Dunia Basic acak, Survival/Creative, siang &amp; malam, gathering &amp; crafting, 3 slot dunia.<br>
+            v1.4 — Loading screen, efek suara, animasi spell, perbaikan wajah party.<br>
+            v1.3 — Aset pixel art baru untuk karakter, monster, map, dan item.
+          </div>
+        </div>
+        <div class="setbox">
+          <b>Media Sosial</b>
+          <a class="lnk" href="https://whatsapp.com/channel/0029VbEBMUEHVvTgS3xotJ1t" target="_blank" rel="noopener">Saluran WhatsApp VyokerDEV</a>
+          <a class="lnk" href="https://github.com/Vyoker/final-world" target="_blank" rel="noopener">GitHub: Vyoker/final-world</a>
+        </div>
+        <div class="setbox">
+          <b>Dukungan</b>
+          <div class="small">Laporkan bug atau kirim saran lewat saluran WhatsApp di atas.</div>
+        </div>
+        <button id="btnBackSettings" class="ghost" type="button">Kembali</button>
+      </div>
+      <div id="titleFoot"><span id="verTag">v1.5.2</span><span>VyokerDEV</span></div>
     </div>
     <div id="loading">
       <div class="ld-in">

@@ -1,4 +1,4 @@
-/* Final World engine v1.5.1 — data driven. Data: localStorage 'fw_data' (dari editor) atau window.GAME_DATA. */
+/* Final World engine v1.5.2 — data driven. Data: localStorage 'fw_data' (dari editor) atau window.GAME_DATA. */
 (function () {
   'use strict';
   const { Auth, IMG } = FW;
@@ -19,14 +19,27 @@
   $('gtitle').textContent = D.meta.title || 'Final World';
   document.title = D.meta.title || 'Final World';
   $('who').textContent = 'Halo, ' + sess.name;
-  $('btnLogout').onclick = () => Auth.logout();
-  // suara: aktifkan konteks audio saat interaksi pertama; tombol mute di layar judul
+  $('verTag').textContent = 'v' + (D.meta.version || '1.5.2');
+  $('accName').textContent = 'Login sebagai: ' + sess.name;
+  // suara: aktifkan konteks audio saat interaksi pertama; tombol mute ada di Pengaturan
   addEventListener('pointerdown', () => SFX.unlock(), { once: true });
   addEventListener('keydown', () => SFX.unlock(), { once: true });
-  const btnSound = $('btnSound');
+  const btnSound = $('btnSound2');
   const syncSoundBtn = () => { if (btnSound) btnSound.textContent = 'Suara: ' + (SFX.muted ? 'Mati' : 'Nyala'); };
   syncSoundBtn();
   if (btnSound) btnSound.onclick = () => { SFX.toggle(); syncSoundBtn(); if (!SFX.muted) SFX.click(); };
+  // navigasi judul gaya Minecraft: Beranda (Main / Pengaturan) -> sub-layar -> Kembali
+  const showTitle = (which) => {
+    $('menuHome').classList.toggle('hidden', which !== 'home');
+    $('menuWorlds').classList.toggle('hidden', which !== 'worlds');
+    $('menuSettings').classList.toggle('hidden', which !== 'settings');
+  };
+  $('btnPlay').onclick = () => { SFX.select(); renderTitle(); showTitle('worlds'); };
+  $('btnSettings').onclick = () => { SFX.select(); syncSoundBtn(); showTitle('settings'); };
+  $('btnBackWorlds').onclick = () => { SFX.back(); showTitle('home'); };
+  $('btnBackSettings').onclick = () => { SFX.back(); showTitle('home'); };
+  $('btnLogout2').onclick = () => Auth.logout();
+  $('btnNewAcc').onclick = () => { location.href = '../index.html#register'; };
 
   // ---------- dunia v1.5: 3 slot, mode Survival/Creative, kesulitan, siang/malam ----------
   const WKEY = 'fw_worlds_' + sess.name;
@@ -85,11 +98,17 @@
     if (!S.world) S.world = { slot, kind: w.kind, mode: w.mode, difficulty: w.difficulty, seed: w.seed || 0 };
     if (!S.gather) S.gather = {};
     S.phase = phaseNow();
+    // pengaman v1.5.2: kalau save menunjuk map/posisi yang sudah tidak ada
+    // (dunia buatan di-snapshot ulang dengan map berbeda), kembalikan ke start dunia
+    const m = by(D.maps, S.map);
+    if (!m || S.x < 0 || S.y < 0 || S.x >= m.w || S.y >= m.h || !['G', 'P', 'D', 'F'].includes((m.tiles[S.y] || '')[S.x])) {
+      S.map = D.meta.startMap; S.x = D.meta.startX; S.y = D.meta.startY;
+    }
     mode = 'explore'; $('title').classList.add('hidden'); hud(); return true;
   }
 
   // ---------- map ----------
-  const curMap = () => by(D.maps, S.map);
+  const curMap = () => by(D.maps, S.map) || D.maps[0];
   const tileAt = (map, x, y) => { const r = map.tiles[y]; return r ? r[x] : undefined; };
   const eventAt = (map, x, y) => (map.events || []).find((e) => e.x === x && e.y === y && !(e.flag && S.flags[e.flag]));
   function solid(map, x, y) {

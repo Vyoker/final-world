@@ -45,6 +45,7 @@ input,select{width:100%;padding:10px;background:#05082a;color:#fff;border:1px so
     $('p').autocomplete = r ? 'new-password' : 'current-password';
   }
   $('tLogin').onclick = () => mode(false); $('tReg').onclick = () => mode(true);
+  if (location.hash === '#register') mode(true);
   $('f').onsubmit = (e) => {
     e.preventDefault();
     const r = reg ? Auth.register($('u').value, $('p').value) : Auth.login($('u').value, $('p').value);
