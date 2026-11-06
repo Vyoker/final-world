@@ -1,4 +1,4 @@
-# Final World (v1.5)
+# Final World (v1.5.1)
 
 RPG turn-based bernuansa Final Fantasy klasik, lengkap dengan editor untuk membuat duniamu sendiri. Main langsung di browser, tanpa install.
 
@@ -36,14 +36,11 @@ Semua data, nama, dan grafis di game ini orisinal.
 - **Keyboard:** panah / WASD bergerak, Enter / Z / Spasi konfirmasi, X batal, Esc menu.
 - **Layar sentuh:** D-pad dan tombol A / B / MENU di bawah layar.
 
-## Yang Baru di v1.5
+## Yang Baru di v1.5.1
 
-- Dunia Basic: map acak dari seed 1-10 dengan 1 misi, kalahkan Ogre.
-- Mode Survival dan Creative, kesulitan Easy / Medium / Hard (statistik musuh menyesuaikan).
-- Siklus siang dan malam tiap 1 jam waktu nyata; encounter 45% di siang, 70% di malam.
-- Gathering (Kayu, Batu, Herbal, Kulit) dan crafting 9 resep.
-- Maksimal 3 slot dunia: 1 Dunia Basic + 2 Dunia Buatan dari Maker.
-- Maker kini terbuka bebas untuk semua pemain, tanpa kunci.
+- Layar judul dibuat ringkas dan bisa di-scroll di dalam layar, tidak lagi meluber ke tombol kontrol.
+- Joystick dan tombol aksi kini transparan dan mengambang di bawah layar.
+- Tombol A dan B disusun miring seperti controller (A kanan atas, B kiri bawah), tombol MENU di sampingnya.
 
 ## Teknologi
 

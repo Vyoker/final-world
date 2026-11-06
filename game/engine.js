@@ -1,4 +1,4 @@
-/* Final World engine v1.5 — data driven. Data: localStorage 'fw_data' (dari editor) atau window.GAME_DATA. */
+/* Final World engine v1.5.1 — data driven. Data: localStorage 'fw_data' (dari editor) atau window.GAME_DATA. */
 (function () {
   'use strict';
   const { Auth, IMG } = FW;
